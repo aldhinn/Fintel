@@ -1,0 +1,10 @@
+# Untrack cmake list files from the repository's programming language statistics.
+**CMakeLists.txt                            -linguist-detectable
+**.cmake                                    -linguist-detectable
+**.cc                                       -linguist-detectable
+**.cpp                                      -linguist-detectable
+**.h                                        -linguist-detectable
+**.kt                                       -linguist-detectable
+**.swift                                    -linguist-detectable
+**.html                                     -linguist-detectable
+**.java                                     -linguist-detectable
