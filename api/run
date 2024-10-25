@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Run this if you're using a posix compliant system.
+
+if [ ! command -v python > /dev/null 2>&1 ]; then
+    echo "Please install python in your system."
+    exit -1
+fi
+if [ ! command -v pytest > /dev/null 2>&1 ]; then
+    echo "Please install pytest in your system."
+    exit -1
+fi
+
+# The directory where this script exists.
+script_dir="$(dirname "$(readlink -f "$0")")"
+
+# Check if the first argument is "test"
+if [ "$1" = "test" ]; then
+    # Run the tests
+    pytest $script_dir
+else
+    # Default behavior: Run the application
+    python $script_dir/app.py
+fi
