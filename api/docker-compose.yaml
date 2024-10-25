@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  fintel-api-service:
+    build:
+      context: ./
+    container_name: fintel-api-service
+    volumes:
+      - fintel-data:/app/data:rw
+      - fintel-model:/app/model:rw
+
+volumes:
+  fintel-model:
+  fintel-data:
