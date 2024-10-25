@@ -1,0 +1,29 @@
+# Flask for creating the REST API
+Flask>=3.0.3
+
+# Flask-CORS to handle cross-origin requests from the Flutter frontend
+Flask-CORS>=5.0.0
+
+# TensorFlow for building and running the LSTM model
+tensorflow>=2.2.3
+
+# pandas for data manipulation and preprocessing
+pandas>=1.5.3
+
+# numpy for numerical computations
+numpy>=2.1.2
+
+# API for fetching stock data.
+yfinance>=0.2.47
+
+# API for fetching stock data.
+alpha-vantage>=3.0.0
+
+# matplotlib (for any visualization during testing or debugging)
+matplotlib>=3.9.2
+
+# scikit-learn for potential data scaling or model evaluation
+scikit-learn>=1.5.2
+
+# For testing
+pytest>=8.3.3
