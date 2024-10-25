@@ -5,13 +5,13 @@ Flask>=3.0.3
 Flask-CORS>=5.0.0
 
 # TensorFlow for building and running the LSTM model
-tensorflow>=2.2.3
+tensorflow>=2.18.0
 
 # pandas for data manipulation and preprocessing
 pandas>=1.5.3
 
 # numpy for numerical computations
-numpy>=2.1.2
+numpy>=2.0.2
 
 # API for fetching stock data.
 yfinance>=0.2.47
