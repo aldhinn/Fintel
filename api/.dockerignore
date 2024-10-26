@@ -6,4 +6,5 @@
 **..db
 **..sqlite3
 **..log
+**venv
 run.bat
