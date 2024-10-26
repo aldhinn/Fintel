@@ -22,7 +22,7 @@ set "script_dir=%~dp0"
 
 if "%~1"=="test" (
     @rem Run the tests
-    %pytest_exe% %script_dir%
+    %pytest_exe% -s %script_dir%
 ) else (
     @rem Default behavior: Run the application
     %python_exe% %script_dir%\app.py

@@ -17,7 +17,7 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # Check if the first argument is "test"
 if [ "$1" = "test" ]; then
     # Run the tests
-    pytest $script_dir
+    pytest -s $script_dir
 else
     # Default behavior: Run the application
     python $script_dir/app.py
