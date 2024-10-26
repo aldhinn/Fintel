@@ -8,3 +8,6 @@
 **..sqlite3
 **..log
 **venv
+
+# Git ignore vscode configurations.
+**.vscode
