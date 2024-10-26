@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install the required Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --root-user-action ignore -r requirements.txt
 
 # Set the entrypoint to the script
 ENTRYPOINT ["/app/run"]
