@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-def test_fetch_from_yfinance():
+def test_fetch_from_yfinance() -> None:
+    """Test whether we have successfully fetched data from Yahoo Finance.
+    """
+
     from utils.fetch_data import fetch_data
 
     ticker = "AAPL"
