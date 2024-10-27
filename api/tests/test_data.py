@@ -4,7 +4,7 @@ def test_fetch_from_yfinance() -> None:
     """Test whether we have successfully fetched data from Yahoo Finance.
     """
 
-    from utils.fetch_data import fetch_data
+    from utils.data import fetch_data
 
     ticker = "AAPL"
     start_date = "2024-10-1"
