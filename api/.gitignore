@@ -1,0 +1,2 @@
+# Git ignoring tensorflow keras model files.
+**.h5
