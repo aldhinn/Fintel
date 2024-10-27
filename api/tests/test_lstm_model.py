@@ -4,7 +4,7 @@ import pytest
 from tensorflow.keras import Model
 import numpy as np
 from pandas import DataFrame
-from models.lstm_model import build_lstm_model, train_lstm_model, save_lstm_model,\
+from utils.lstm_model import build_lstm_model, train_lstm_model, save_lstm_model,\
     load_lstm_model, preprocess_lstm_data
 
 @pytest.fixture

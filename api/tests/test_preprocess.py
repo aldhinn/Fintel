@@ -2,7 +2,7 @@
 
 import pytest
 from pandas import DataFrame
-from models.preprocess import handle_missing_values, remove_outliers,\
+from utils.preprocess import handle_missing_values, remove_outliers,\
     normalize_columns, preprocess_data
 import numpy as np
 
