@@ -1,12 +1,17 @@
 #!/usr/bin/python
 
-from utils.routes import create_app
+from flask import Flask, Blueprint
+
+_main = Blueprint('main', __name__)
 
 def main() -> None:
     """ The entry point of the application.
     """
 
-    app = create_app()
+    app = Flask(__name__, instance_relative_config=True)
+
+    # Register Blueprints
+    app.register_blueprint(_main)
     app.run()
 
 if __name__ == "__main__":
