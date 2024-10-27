@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy everything into the container 
 COPY . .
 
+# Upgrade pip.
+RUN pip install --root-user-action ignore --upgrade pip
 # Install the required Python packages
 RUN pip install --no-cache-dir --root-user-action ignore -r requirements.txt
 
