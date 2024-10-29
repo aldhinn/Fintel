@@ -3,7 +3,7 @@
 import pytest
 from pandas import DataFrame
 from utils.data import handle_missing_values, remove_outliers,\
-    normalize_columns, preprocess_data
+    normalize_columns, preprocess_dataframe
 import numpy as np
 
 def test_fetch_from_yfinance() -> None:
@@ -78,7 +78,7 @@ def test_preprocess_data(sample_data) -> None:
         removing outliers, and normalizing.
     """
 
-    result = preprocess_data(
+    result = preprocess_dataframe(
         df=sample_data,
         columns_to_normalize=["price", "volume"],
         missing_value_strategy="fill",

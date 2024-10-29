@@ -130,7 +130,7 @@ def normalize_columns(df:DataFrame, columns:list[str]) -> DataFrame:
     df[columns] = scaler.fit_transform(df[columns])
     return df
 
-def preprocess_data(df:DataFrame, columns_to_normalize:list[str],\
+def preprocess_dataframe(df:DataFrame, columns_to_normalize:list[str],\
     missing_value_strategy:Literal['drop','fill']='drop', fill_value:float=0,\
     outlier_column:str|None=None, outlier_threshold=1.5) -> DataFrame:
     """Full data preprocessing pipeline, including handling missing values,\
