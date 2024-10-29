@@ -9,4 +9,5 @@
 **venv/
 **db/
 run.bat
-config.py.example
+**Dockerfile
+**docker-compose.yaml
