@@ -55,7 +55,7 @@ def fetch_data(name:str, start_date:str, end_date:str, \
         except Exception as e:
             print(f"Error fetching data for {name} from Yahoo Finance: {e}")
             return None
-    elif source == APISourceEnum.YAHOO_FINANCE:
+    elif source == APISourceEnum.ALPHA_VANTAGE:
         ts = TimeSeries(key=api_key, output_format='pandas')
         try:
             data, _ = ts.get_daily_adjusted(symbol=name, outputsize='full')
