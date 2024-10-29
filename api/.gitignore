@@ -1,2 +1,5 @@
 # Git ignoring tensorflow keras model files.
 **.h5
+
+# Git ignore application secrets.
+**secrets/

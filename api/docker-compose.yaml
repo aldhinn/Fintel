@@ -2,13 +2,40 @@ version: '3.8'
 
 services:
   fintel-api-service:
+    container_name: fintel-api-service
     build:
       context: ./
-    container_name: fintel-api-service
     volumes:
-      - fintel-data:/app/data:rw
-      - fintel-model:/app/model:rw
+      - fintel-service-data:/app/data:rw
+    environment:
+      - SERVICE_PORT=5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - fintel-database
+
+  fintel-database:
+    container_name: fintel-database
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: "fintel-db"
+    secrets:
+      - db_user
+      - db_password
+    volumes:
+      - fintel-database-data:/var/lib/postgresql/data
+      - ./db/setup.sql:/docker-entrypoint-initdb.d/init.sql
+
+secrets:
+  db_user:
+    file: ./secrets/db_user
+  db_password:
+    file: ./secrets/db_password
 
 volumes:
-  fintel-model:
-  fintel-data:
+  fintel-service-data:
+  fintel-database-data:
