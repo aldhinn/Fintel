@@ -9,16 +9,7 @@ flask_app = Flask(__name__)
 from config import Config
 flask_app.config.from_object(Config)
 
-from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy(flask_app)
-
-class Assets(db.Model):
-    """The model for the assets database table.
-    """
-
-    __tablename__ = "assets"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+from utils.db import Assets
 
 @flask_app.route("/assets", methods=["GET"])
 def get_assets() -> Response:
@@ -35,4 +26,6 @@ def get_assets() -> Response:
     return jsonify({"assets": asset_names_list})
 
 if __name__ == "__main__":
+    from utils.db import db
+    db.init_app(flask_app)
     flask_app.run(host="0.0.0.0", port=flask_app.config["PORT"])
