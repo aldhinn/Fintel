@@ -22,13 +22,13 @@ services:
     environment:
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB: "fintel-db"
+      POSTGRES_DB: fintel-db
     secrets:
       - db_user
       - db_password
     volumes:
-      - fintel-database-data:/var/lib/postgresql/data
-      - ./db/setup.sql:/docker-entrypoint-initdb.d/init.sql
+      - fintel-database-data:/var/lib/postgresql/data:rw
+      - ./db/setup.sql:/docker-entrypoint-initdb.d/setup.sql:ro
 
 secrets:
   db_user:
