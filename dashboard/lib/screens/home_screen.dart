@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchAssets();
+    fetchAssets();
   }
 
   /// Fetches asset names from the server using the provided hostname and port.
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// This method sends an HTTP GET request to the server's /assets endpoint.
   /// If successful, it updates the state with the retrieved asset names.
   /// If the request fails, it navigates back to the ConnectScreen.
-  Future<void> _fetchAssets() async {
+  Future<void> fetchAssets() async {
     final url = Uri.parse('http://${widget.hostname}:${widget.port}/assets');
 
     setState(() {
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showErrorDialog("Failed to load assets.");
       }
     } catch (e) {
-      _showErrorDialog("Connection error: Unable to fetch assets.");
+      _showErrorDialog("Connection error.");
     } finally {
       setState(() {
         _isLoading = false;
@@ -142,7 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// to the AssetDetailsScreen with the selected asset.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GestureDetector(
+      onTap: fetchAssets,
+      child: Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
       ),
@@ -168,8 +170,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () async {
-                          await Navigator.push(
+                        onTap: () {
+                          fetchAssets();
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => AssetDetailsScreen(
@@ -177,12 +180,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           );
-                          _fetchAssets();
                         },
                       ),
                     );
                   },
                 ),
+    ),
     );
   }
 }
