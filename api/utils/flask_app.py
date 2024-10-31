@@ -3,7 +3,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
-from config import Config
+from utils.config import Config
 
 # Create the flask application instance.
 flask_app = Flask(__name__)
@@ -18,11 +18,11 @@ Base = automap_base()
 with flask_app.app_context():
     Base.prepare(db.engine, reflect=True)
     # Access reflected tables as classes
-    AssetEntry = Base.classes.assets
+    TickerEntry = Base.classes.tickers
 
-class AssetsTable(db.Model):
-    """The model to the assets table.
+class TickersTable(db.Model):
+    """The model to the tickers table.
     """
-    __tablename__ = "assets"
+    __tablename__ = "tickers"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

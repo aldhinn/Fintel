@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 from flask import Response, jsonify, request
-from utils.data import analyze_assets_from_list
-from utils.flask_app import flask_app, AssetEntry, db, AssetsTable
+from utils.data import analyze_tickers_from_list
+from utils.flask_app import flask_app, TickerEntry, db, TickersTable
 from concurrent.futures import ThreadPoolExecutor
 
 # ThreadPoolExecutor instance for handling concurrent tasks
 executor = ThreadPoolExecutor()
 
-@flask_app.route("/assets", methods=["GET"])
-def get_assets() -> Response:
-    """Get the list of financial assets to be analyzed.
+@flask_app.route("/tickers", methods=["GET"])
+def get_tickers() -> Response:
+    """Get the list of financial tickers to be analyzed.
 
     Returns:
-        Response: The response json containing the list of asset names analyzed.
+        Response: The response json containing the list of tickers analyzed.
     """
 
     # Query only the "name" column with active status.
-    asset_names = AssetsTable.query.with_entities(AssetEntry.name).filter_by(status="active").all()
+    ticker_names = TickersTable.query.with_entities(TickerEntry.name).filter_by(status="active").all()
     # Format the result as a list of names
-    asset_names_list = [name[0] for name in asset_names]
-    return jsonify({"assets": asset_names_list})
+    ticker_names_list = [name[0] for name in ticker_names]
+    return jsonify({"tickers": ticker_names_list})
 
 @flask_app.route("/request", methods=["POST"])
 def post_request() -> Response:
-    """Request for an asset to be analyzed.
+    """Request for a ticker to be analyzed.
 
     Returns:
         Response: The response json containing whether the request was successful and\
@@ -32,40 +32,40 @@ def post_request() -> Response:
     """
 
     # Retrieve the json request object.
-    asset_names_list = request.get_json()
+    ticker_names_list = request.get_json()
 
-    if isinstance(asset_names_list, list): # Check if this is a list object.
-        if not asset_names_list:
+    if isinstance(ticker_names_list, list): # Check if this is a list object.
+        if not ticker_names_list:
             return jsonify({
                 "success": False,
-                "message": "Provided empty asset names list."
+                "message": "Provided empty tickers list."
             })
 
-        # Iterate over the asset names to check for invalid values.
-        for asset_name in asset_names_list:
-            if not isinstance(asset_name, str):
+        # Iterate over the tickers to check for invalid values.
+        for ticker_name in ticker_names_list:
+            if not isinstance(ticker_name, str):
                 db.session.rollback()
                 return jsonify({
                     "success": False,
-                    "message": f"Invalid asset name value: {asset_name}"
+                    "message": f"Invalid ticker name value: {ticker_name}"
                 })
 
             # Check if the username already exists
-            existing_user = AssetsTable.query.filter_by(name=asset_name).first()
+            existing_user = TickersTable.query.filter_by(name=ticker_name).first()
             if existing_user:
                 # Continue to the next entry.
                 continue
 
             # Construct the database model.
-            new_asset_entry = AssetEntry(name=asset_name, status="pending")
+            new_ticker_entry = TickerEntry(name=ticker_name, status="pending")
             # Add to the database.
-            db.session.add(new_asset_entry)
+            db.session.add(new_ticker_entry)
 
         try:
             # Commit everything that was just done to the live database.
             db.session.commit()
             # Run on the background.
-            executor.submit(analyze_assets_from_list, asset_names_list)
+            executor.submit(analyze_tickers_from_list, ticker_names_list)
 
             return jsonify({"success": True})
 
@@ -79,7 +79,7 @@ def post_request() -> Response:
     else:
         return jsonify({
             "success": False,
-            "message": "The requested asset names must be sent via a list of strings."
+            "message": "The requested tickers must be sent via a list of strings."
         })
 
 if __name__ == "__main__":

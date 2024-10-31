@@ -1,7 +1,7 @@
 ### This file contains sample RESTApi requests.
 
-### Get active assets.
-GET http://localhost:5000/assets
+### Get active tickers.
+GET http://localhost:5000/tickers
 
 ### Request a single asset.
 POST http://localhost:5000/request
@@ -11,7 +11,7 @@ Content-Type: application/json
     "AAPL"
 ]
 
-### Request multiple assets.
+### Request multiple tickers.
 POST http://localhost:5000/request
 Content-Type: application/json
 

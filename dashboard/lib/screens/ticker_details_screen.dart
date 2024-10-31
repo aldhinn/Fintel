@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-class AssetDetailsScreen extends StatelessWidget {
-  final String assetName;
+class TickerDetailsScreen extends StatelessWidget {
+  final String tickerName;
 
-  const AssetDetailsScreen({super.key, required this.assetName});
+  const TickerDetailsScreen({super.key, required this.tickerName});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(assetName),
+        title: Text(tickerName),
       ),
       body: Center(
         child: Text(
-          "Details, graphs, and information for $assetName will appear here.",
+          "Details, graphs, and information for $tickerName will appear here.",
           style: const TextStyle(fontSize: 16),
           textAlign: TextAlign.center,
         ),

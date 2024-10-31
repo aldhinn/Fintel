@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'asset_details_screen.dart';
+import 'ticker_details_screen.dart';
 
 /// A stateful widget that displays the dashboard.
 class HomeScreen extends StatefulWidget {
-  final List<String> assets;
+  final List<String> tickers;
   final String hostname;
   final String port;
 
   const HomeScreen(
       {super.key,
-      required this.assets,
+      required this.tickers,
       required this.hostname,
       required this.port});
 
@@ -21,43 +21,43 @@ class HomeScreen extends StatefulWidget {
 
 /// HomeScreen Widget
 ///
-/// This screen displays a list of asset names retrieved from the Fintel server.
-/// It serves as the main interface for users to view available assets and
-/// navigate to detailed views of each asset.
+/// This screen displays a list of tickers retrieved from the Fintel server.
+/// It serves as the main interface for users to view available tickers and
+/// navigate to detailed views of each ticker.
 ///
-/// The HomeScreen retrieves asset data from the server whenever it is
+/// The HomeScreen retrieves ticker data from the server whenever it is
 /// displayed, ensuring that users always see the most up-to-date information.
 ///
 /// Key Features:
-/// - A dynamic list of assets presented in a visually appealing format.
-/// - Clicking on an asset name navigates to the AssetDetailsScreen,
+/// - A dynamic list of tickers presented in a visually appealing format.
+/// - Clicking on an ticker name navigates to the tickerDetailsScreen,
 ///   where users can view detailed information and graphs related to
-///   the selected asset.
-/// - Automatically refreshes asset data when navigating back from the
-///   AssetDetailsScreen, ensuring the user sees any updates that may have
+///   the selected ticker.
+/// - Automatically refreshes ticker data when navigating back from the
+///   tickerDetailsScreen, ensuring the user sees any updates that may have
 ///   occurred during their navigation.
 ///
 /// This screen does not include a back navigation arrow to the
 /// ConnectScreen, enforcing a straightforward navigation flow
 /// within the application.
 class _HomeScreenState extends State<HomeScreen> {
-  /// A list to hold the asset names retrieved from the server.
-  List<String> _assets = [];
+  /// A list to hold the ticker names retrieved from the server.
+  List<String> _tickers = [];
 
-  /// A boolean to track the loading state of the asset fetching process.
+  /// A boolean to track the loading state of the ticker fetching process.
   bool _isLoading = true;
 
-  /// Initializes the state and fetches asset names from the server.
+  /// Initializes the state and fetches tickers from the server.
   ///
   /// This method is called when the widget is first created.
-  /// It triggers the _fetchAssets method to load the asset names
+  /// It triggers the _fetchTickers method to load the tickers
   /// immediately upon entering the HomeScreen.
   @override
   void initState() {
     super.initState();
     setState(() {
-      // Initial _assets values.
-      _assets = widget.assets;
+      // Initial _tickers values.
+      _tickers = widget.tickers;
     });
   }
 
@@ -79,16 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    fetchAssets();
+    fetchTickers();
   }
 
-  /// Fetches asset names from the server using the provided hostname and port.
+  /// Fetches tickers from the server using the provided hostname and port.
   ///
-  /// This method sends an HTTP GET request to the server's /assets endpoint.
-  /// If successful, it updates the state with the retrieved asset names.
+  /// This method sends an HTTP GET request to the server's /tickers endpoint.
+  /// If successful, it updates the state with the retrieved tickers.
   /// If the request fails, it navigates back to the ConnectScreen.
-  Future<void> fetchAssets() async {
-    final url = Uri.parse('http://${widget.hostname}:${widget.port}/assets');
+  Future<void> fetchTickers() async {
+    final url = Uri.parse('http://${widget.hostname}:${widget.port}/tickers');
 
     setState(() {
       _isLoading = true;
@@ -99,13 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         final decodedData = jsonDecode(response.body);
-        if (decodedData is Map && decodedData.containsKey('assets')) {
+        if (decodedData is Map && decodedData.containsKey('tickers')) {
           setState(() {
-            _assets = List<String>.from(decodedData['assets']);
+            _tickers = List<String>.from(decodedData['tickers']);
           });
         }
       } else {
-        _showErrorDialog("Failed to load assets.");
+        _showErrorDialog("Failed to load tickers.");
       }
     } catch (e) {
       _showErrorDialog("Connection error.");
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Displays an error dialog with the specified message.
   ///
-  /// This method is called when there is an error in fetching assets
+  /// This method is called when there is an error in fetching tickers
   /// or if the server responds with an error status code.
   void _showErrorDialog(String message) {
     showDialog(
@@ -142,23 +142,23 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Builds the user interface for the HomeScreen.
   ///
   /// This method constructs the layout of the screen, including
-  /// a loading indicator if assets are being fetched and a ListView
-  /// to display the asset names. Tapping an asset name navigates
-  /// to the AssetDetailsScreen with the selected asset.
+  /// a loading indicator if tickers are being fetched and a ListView
+  /// to display the tickers. Tapping an ticker name navigates
+  /// to the TickerDetailsScreen with the selected ticker.
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: fetchAssets,
+      onTap: fetchTickers,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _assets.isEmpty
-                ? const Center(child: Text("No assets found"))
+            : _tickers.isEmpty
+                ? const Center(child: Text("No tickers found"))
                 : ListView.builder(
-                    itemCount: _assets.length,
+                    itemCount: _tickers.length,
                     itemBuilder: (context, index) {
                       return Card(
                         margin: const EdgeInsets.symmetric(
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: ListTile(
                           title: Text(
-                            _assets[index],
+                            _tickers[index],
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -178,12 +178,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           trailing:
                               const Icon(Icons.arrow_forward_ios, size: 16),
                           onTap: () {
-                            fetchAssets();
+                            fetchTickers();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => AssetDetailsScreen(
-                                  assetName: _assets[index],
+                                builder: (context) => TickerDetailsScreen(
+                                  tickerName: _tickers[index],
                                 ),
                               ),
                             );
