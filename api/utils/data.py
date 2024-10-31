@@ -161,6 +161,19 @@ def preprocess_dataframe(df:DataFrame, columns_to_normalize:list[str],\
     
     return df
 
+def analyze_assets_from_list(asset_names_list:list[str]) -> None:
+    """Analyze the list of assets specified.
+
+    Args:
+        asset_names_list (list[str]): The name of the asset to be analyzed.
+    """
+
+    # TODO: Delete later upon implementation completion.
+    for asset_name in asset_names_list:
+        print(f"Analyzing asset name: {asset_name}")
+
+    # TODO: Implement.
+
 if __name__ == "__main__":
     for _, source in enumerate(APISourceEnum):
         print(f"APISourceEnum: {source}, Value: {source.value}, Description: {source.description}")
