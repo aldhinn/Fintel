@@ -1,3 +1,45 @@
-# This file contains sample RESTApi requests.
+### This file contains sample RESTApi requests.
 
+### Get active assets.
 GET http://localhost:5000/assets
+
+### Request a single asset.
+POST http://localhost:5000/request
+Content-Type: application/json
+
+[
+    "AAPL"
+]
+
+### Request multiple assets.
+POST http://localhost:5000/request
+Content-Type: application/json
+
+[
+    "AAPL",
+    "GOOGL"
+]
+
+### Empty asset list.
+POST http://localhost:5000/request
+Content-Type: application/json
+
+[
+]
+
+### Invalid request format.
+POST http://localhost:5000/request
+Content-Type: application/json
+
+{
+    "name": "AAPL"
+}
+
+### Requesting an object to be added.
+POST http://localhost:5000/request
+Content-Type: application/json
+
+[
+    "GOOGL",
+    {"name": "AAPL"}
+]
