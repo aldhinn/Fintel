@@ -34,7 +34,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
   /// navigates to the HomeScreen. If it fails, it shows an error dialog
   /// to inform the user.
   Future<void> _connectToServer() async {
-    final hostname = _hostnameController.text.isEmpty ? 'localhost' : _hostnameController.text;
+    final hostname = _hostnameController.text.isEmpty
+        ? 'localhost'
+        : _hostnameController.text;
     final port = _portController.text.isEmpty ? '5000' : _portController.text;
     final url = Uri.parse('http://$hostname:$port/assets');
 
@@ -44,14 +46,17 @@ class _ConnectScreenState extends State<ConnectScreen> {
       if (response.statusCode == 200) {
         final decodedData = jsonDecode(response.body);
 
-        if (decodedData is Map && decodedData.containsKey('assets') && decodedData['assets'] is List) {
+        if (decodedData is Map &&
+            decodedData.containsKey('assets') &&
+            decodedData['assets'] is List) {
           List<String> assets = List<String>.from(decodedData['assets']);
 
           // Navigate to HomeScreen with the list of assets
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeScreen(assets: assets, hostname: hostname, port: port),
+              builder: (context) =>
+                  HomeScreen(assets: assets, hostname: hostname, port: port),
             ),
           );
         } else {
@@ -103,8 +108,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
             Text(
               "Welcome to Fintel",
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
@@ -133,12 +138,11 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: _connectToServer,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-              ),
-              child: const Text("Connect")
-            ),
+                onPressed: _connectToServer,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                ),
+                child: const Text("Connect")),
           ],
         ),
       ),

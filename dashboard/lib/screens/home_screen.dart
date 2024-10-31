@@ -9,7 +9,11 @@ class HomeScreen extends StatefulWidget {
   final String hostname;
   final String port;
 
-  const HomeScreen({super.key, required this.assets, required this.hostname, required this.port});
+  const HomeScreen(
+      {super.key,
+      required this.assets,
+      required this.hostname,
+      required this.port});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -23,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 ///
 /// The HomeScreen retrieves asset data from the server whenever it is
 /// displayed, ensuring that users always see the most up-to-date information.
-/// 
+///
 /// Key Features:
 /// - A dynamic list of assets presented in a visually appealing format.
 /// - Clicking on an asset name navigates to the AssetDetailsScreen,
@@ -39,6 +43,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   /// A list to hold the asset names retrieved from the server.
   List<String> _assets = [];
+
   /// A boolean to track the loading state of the asset fetching process.
   bool _isLoading = true;
 
@@ -58,14 +63,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Called when the dependencies of this State object change.
   ///
-  /// This method is triggered after the state object is created and 
+  /// This method is triggered after the state object is created and
   /// whenever the dependencies of the widget change. This can occur
   /// when the parent widget rebuilds, which can affect the inherited
   /// widgets that this State object relies on.
   ///
   /// Typically, this method is overridden to fetch data that requires
   /// the build context or to listen to inherited widget changes.
-  /// 
+  ///
   /// For instance, if you have an InheritedWidget that provides data
   /// to this widget, you can use this method to react to those changes.
   /// In this case, there is no specific implementation required for
@@ -145,47 +150,49 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: fetchAssets,
       child: Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _assets.isEmpty
-              ? const Center(child: Text("No assets found"))
-              : ListView.builder(
-                  itemCount: _assets.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          _assets[index],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _assets.isEmpty
+                ? const Center(child: Text("No assets found"))
+                : ListView.builder(
+                    itemCount: _assets.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          fetchAssets();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AssetDetailsScreen(
-                                assetName: _assets[index],
-                              ),
+                        child: ListTile(
+                          title: Text(
+                            _assets[index],
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                             ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-    ),
+                          ),
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () {
+                            fetchAssets();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AssetDetailsScreen(
+                                  assetName: _assets[index],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+      ),
     );
   }
 }

@@ -4,10 +4,13 @@ import 'package:fintel/screens/home_screen.dart';
 
 void main() {
   group('HomeScreen Tests', () {
-    testWidgets('Loading indicator is shown during asset fetch', (WidgetTester tester) async {
+    testWidgets('Loading indicator is shown during asset fetch',
+        (WidgetTester tester) async {
       // Mock the HomeScreen with some sample assets
       final sampleAssets = ['appl', 'googl'];
-      await tester.pumpWidget(MaterialApp(home: HomeScreen(assets: sampleAssets, hostname: 'localhost', port: '5000')));
+      await tester.pumpWidget(MaterialApp(
+          home: HomeScreen(
+              assets: sampleAssets, hostname: 'localhost', port: '5000')));
 
       // Initially, loading indicator should be present
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -23,7 +26,9 @@ void main() {
     testWidgets('Assets Displayed', (WidgetTester tester) async {
       // Mock the HomeScreen with some sample assets
       final sampleAssets = ['appl', 'googl'];
-      await tester.pumpWidget(MaterialApp(home: HomeScreen(assets: sampleAssets, hostname: 'localhost', port: '5000')));
+      await tester.pumpWidget(MaterialApp(
+          home: HomeScreen(
+              assets: sampleAssets, hostname: 'localhost', port: '5000')));
 
       // Simulate fetching assets and rebuilding with sample data
       await tester.pumpAndSettle(); // Simulate waiting for the assets to load
