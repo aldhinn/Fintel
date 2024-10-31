@@ -19,8 +19,8 @@ def get_assets() -> Response:
         Response: The response json.
     """
 
-    # Query only the 'name' column
-    asset_names = Assets.query.with_entities(Assets.name).all()
+    # Query only the "name" column with active status.
+    asset_names = Assets.query.with_entities(Assets.name).filter_by(status="active").all()
     # Format the result as a list of names
     asset_names_list = [name[0] for name in asset_names]
     return jsonify({"assets": asset_names_list})
