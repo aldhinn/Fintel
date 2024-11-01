@@ -151,7 +151,45 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: fetchTickers,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          automaticallyImplyLeading: true,
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .primaryColor, // Inherit primary color from theme
+                ),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary, // Inherit text color based on theme
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.switch_left,
+                    color: Theme.of(context)
+                        .iconTheme
+                        .color), // Inherit icon color
+                title: Text(
+                  'Switch Server',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge, // Inherit text style
+                ),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  Navigator.of(context).pop(); // Navigate to ConnectScreen
+                },
+              ),
+            ],
+          ),
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
