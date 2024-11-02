@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'dart:convert';
 import 'ticker_details_screen.dart';
 
@@ -42,10 +43,19 @@ class HomeScreen extends StatefulWidget {
 /// within the application.
 class _HomeScreenState extends State<HomeScreen> {
   /// A list to hold the ticker names retrieved from the server.
-  List<String> _tickers = [];
+  List<String> _tickers = <String>[];
 
   /// A boolean to track the loading state of the ticker fetching process.
   bool _isLoading = true;
+
+  /// Controller for managing the input field where users enter ticker symbols
+  /// they want to request. Used to retrieve and clear user input.
+  final TextEditingController _tickerRequestListController =
+      TextEditingController();
+
+  /// List of ticker symbols specified by the user to be added as new ticker requests.
+  /// Populated as the user adds each ticker to their request.
+  final List<String> _newTickersToBeAdded = <String>[];
 
   /// Initializes the state and fetches tickers from the server.
   ///
@@ -95,10 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final response = await http.get(url);
+      final Response response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final decodedData = jsonDecode(response.body);
+        final dynamic decodedData = jsonDecode(response.body);
         if (decodedData is Map && decodedData.containsKey('tickers')) {
           setState(() {
             _tickers = List<String>.from(decodedData['tickers']);
@@ -123,20 +133,159 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (BuildContext context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
-        actions: [
+        actions: <Widget>[
           TextButton(
             onPressed: () {
               // Navigate back to ConnectScreen
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.popUntil(
+                  context, (Route<dynamic> route) => route.isFirst);
             },
             child: const Text('OK'),
           ),
         ],
       ),
     );
+  }
+
+  /// Displays a confirmation dialog with a given message after a successful tickers request.
+  /// Provides user feedback on request status and can be dismissed with an "OK" button.
+  void _showConfirmationDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text("Success"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Displays a dialog allowing the user to request new tickers.
+  ///
+  /// This method opens a modal dialog where the user can enter the ticker symbols
+  /// they want to request. The dialog contains a text field for input, a list of
+  /// entered tickers, and action buttons to cancel or submit the request. Tickers
+  /// are added to the request list upon pressing Enter in the text field.
+  ///
+  /// Actions:
+  /// - **Cancel**: Closes the dialog and clears the list of entered tickers.
+  /// - **Submit**: Sends a POST request with the tickers to the server if the list
+  ///   is not empty. If no tickers are present, the button is disabled.
+  void _showTickerRequestDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => StatefulBuilder(
+            builder: (context, setState) => AlertDialog(
+                  content: Column(
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          'Request New Tickers',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: TextField(
+                          controller: _tickerRequestListController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter ticker name',
+                            hintText: 'e.g., AAPL',
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (String value) {
+                            if (value.isNotEmpty) {
+                              setState(() {
+                                _newTickersToBeAdded.add(value);
+                                _tickerRequestListController.clear();
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_tickerRequestListController.text.isNotEmpty) {
+                              setState(() {
+                                _newTickersToBeAdded
+                                    .add(_tickerRequestListController.text);
+                                _tickerRequestListController.clear();
+                              });
+                            }
+                          },
+                          child: const Text("Add Ticker"),
+                        ),
+                      ),
+                      Wrap(
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                        children: _newTickersToBeAdded
+                            .map((ticker) => Chip(
+                                  label: Text(ticker),
+                                ))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _newTickersToBeAdded.clear();
+                        });
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    ElevatedButton(
+                      onPressed: _newTickersToBeAdded.isEmpty
+                          ? null
+                          : () async {
+                              final Uri url = Uri.parse(
+                                  'http://${widget.hostname}:${widget.port}/request');
+                              final String payload =
+                                  jsonEncode(_newTickersToBeAdded);
+
+                              try {
+                                final Response response = await http.post(
+                                  url,
+                                  headers: <String, String>{
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: payload,
+                                );
+
+                                if (response.statusCode == 200) {
+                                  Navigator.of(context).pop();
+                                  _showConfirmationDialog("Successfully sent.");
+                                  setState(() {
+                                    _newTickersToBeAdded.clear();
+                                    _tickerRequestListController.clear();
+                                  });
+                                } else {
+                                  _showErrorDialog(
+                                      "Failed to request tickers.");
+                                }
+                              } catch (e) {
+                                _showErrorDialog("Failed to request tickers.");
+                              }
+                            },
+                      child: const Text("Submit"),
+                    ),
+                  ],
+                )));
   }
 
   /// Builds the user interface for the HomeScreen.
@@ -193,43 +342,56 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _tickers.isEmpty
-                ? const Center(child: Text("No tickers found"))
-                : ListView.builder(
-                    itemCount: _tickers.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            _tickers[index],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          trailing:
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () {
-                            fetchTickers();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TickerDetailsScreen(
-                                  tickerName: _tickers[index],
+            : Stack(
+                children: <Widget>[
+                  _tickers.isEmpty
+                      ? const Center(child: Text("No tickers found"))
+                      : ListView.builder(
+                          itemCount: _tickers.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                title: Text(
+                                  _tickers[index],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 16),
+                                onTap: () {
+                                  fetchTickers();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TickerDetailsScreen(
+                                        tickerName: _tickers[index],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },
                         ),
-                      );
-                    },
+                  Positioned(
+                    bottom: 16, // Position it a little above the bottom
+                    left: MediaQuery.of(context).size.width / 2 -
+                        28, // Center horizontally
+                    child: FloatingActionButton(
+                      onPressed: _showTickerRequestDialog,
+                      child: const Icon(Icons.add),
+                    ),
                   ),
+                ],
+              ),
       ),
     );
   }
