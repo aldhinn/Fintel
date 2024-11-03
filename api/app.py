@@ -32,40 +32,44 @@ def post_request() -> Response:
     """
 
     # Retrieve the json request object.
-    ticker_names_list = request.get_json()
+    requested_ticker_names_list = request.get_json()
 
-    if isinstance(ticker_names_list, list): # Check if this is a list object.
-        if not ticker_names_list:
+    if isinstance(requested_ticker_names_list, list): # Check if this is a list object.
+        if not requested_ticker_names_list:
             return jsonify({
                 "success": False,
                 "message": "Provided empty tickers list."
             })
 
+        ticker_names_to_be_analyzed:list[str] = []
+
         # Iterate over the tickers to check for invalid values.
-        for ticker_name in ticker_names_list:
-            if not isinstance(ticker_name, str):
+        for requested_ticker_name in requested_ticker_names_list:
+            if not isinstance(requested_ticker_name, str):
                 db.session.rollback()
                 return jsonify({
                     "success": False,
-                    "message": f"Invalid ticker name value: {ticker_name}"
+                    "message": f"Invalid ticker name value: {requested_ticker_name}"
                 })
 
             # Check if the username already exists
-            existing_user = TickersTable.query.filter_by(name=ticker_name).first()
+            existing_user = TickersTable.query.filter_by(name=requested_ticker_name).first()
             if existing_user:
                 # Continue to the next entry.
                 continue
 
             # Construct the database model.
-            new_ticker_entry = TickerEntry(name=ticker_name, status="pending")
+            new_ticker_entry = TickerEntry(name=requested_ticker_name, status="pending")
             # Add to the database.
             db.session.add(new_ticker_entry)
+            # Add to the list to be analyzed.
+            ticker_names_to_be_analyzed.append(requested_ticker_name)
 
         try:
             # Commit everything that was just done to the live database.
             db.session.commit()
             # Run on the background.
-            executor.submit(analyze_tickers_from_list, ticker_names_list)
+            executor.submit(analyze_tickers_from_list, ticker_names_to_be_analyzed)
 
             return jsonify({"success": True})
 
