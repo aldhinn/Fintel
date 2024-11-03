@@ -32,17 +32,21 @@ class APISourceEnum(Enum):
         obj.description = description
         return obj
 
-def fetch_data(tickerName:str, start_date:str, end_date:str, \
+def fetch_data(tickerName:str, start_date:str = "", end_date:str = "", \
     source:APISourceEnum = APISourceEnum.YAHOO_FINANCE, api_key:str = "") -> DataFrame | None:
     """Fetch ticker data from a specified API.
 
     Args:
         name (str): The name of the ticker.
-        start_date (str): The start date in 'YYYY-MM-DD' format.
-        end_date (str): The end date in 'YYYY-MM-DD' format.
+        start_date (str, optional): The start date in 'YYYY-MM-DD' format.\
+            If neither the start date nor the end date has been specified,\
+            this method will fetch for all data for this ticker.
+        end_date (str, optional): The end date in 'YYYY-MM-DD' format.\
+            If neither the start date nor the end date has been specified,\
+            this method will fetch for all data for this ticker.
         source (APISourceEnum, optional): The source for the finance data. \
             Defaults to APISourceEnum.YAHOO_FINANCE.
-        api_key (str): The api key for the API used to fetch financial data.
+        api_key (str, optional): The api key for the API used to fetch financial data.
 
     Returns:
         DataFrame | None: The ticker data object. None if fetching failed or yielded no data.
@@ -50,6 +54,11 @@ def fetch_data(tickerName:str, start_date:str, end_date:str, \
 
     if source == APISourceEnum.YAHOO_FINANCE:
         try:
+            # Fetching all data if either of the dates is set to "".
+            if start_date == "" or end_date == "":
+                yfinance_data:DataFrame|None = yf.download(tickers=tickerName, period="max")
+                return yfinance_data
+
             yfinance_data:DataFrame|None = yf.download(tickers=tickerName, start=start_date, end=end_date)
             return yfinance_data
         except Exception as e:
@@ -60,7 +69,11 @@ def fetch_data(tickerName:str, start_date:str, end_date:str, \
         try:
             data, _ = ts.get_daily_adjusted(symbol=tickerName, outputsize='full')
             data.index = pd.to_datetime(data.index)
-            
+
+            # Fetching all data if either of the dates is set to "".
+            if start_date == "" or end_date == "":
+                return data
+
             # Filter data within the specified date range
             data = data.loc[(data.index >= start_date) & (data.index <= end_date)]
             if data.empty:
@@ -92,7 +105,7 @@ def handle_missing_values(df:DataFrame, strategy:Literal["fill", "drop"]='drop',
         df = df.fillna(fill_value)
     else:
         raise ValueError("Invalid strategy. Use 'drop' or 'fill'.")
-    
+
     return df
 
 def remove_outliers(df:DataFrame, column:str, threshold:float=1.5) -> DataFrame:
@@ -121,7 +134,7 @@ def normalize_columns(df:DataFrame, columns:list[str]) -> DataFrame:
     Args:
         df (DataFrame): The DataFrame to process.
         columns (list[str]): Columns to normalize.
-    
+
     Returns:
         DataFrame: DataFrame with specified columns normalized.
     """
@@ -151,14 +164,14 @@ def preprocess_dataframe(df:DataFrame, columns_to_normalize:list[str],\
 
     # Handle missing values
     df = handle_missing_values(df, strategy=missing_value_strategy, fill_value=fill_value)
-    
+
     # Remove outliers if specified
     if outlier_column:
         df = remove_outliers(df, outlier_column, threshold=outlier_threshold)
-    
+
     # Normalize specified columns
     df = normalize_columns(df, columns_to_normalize)
-    
+
     return df
 
 def analyze_tickers_from_list(ticker_names_list:list[str]) -> None:
