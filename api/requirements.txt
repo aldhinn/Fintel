@@ -19,14 +19,8 @@ yfinance>=0.2.47
 # API for fetching stock data.
 alpha-vantage>=3.0.0
 
-# matplotlib (for any visualization during testing or debugging)
-matplotlib>=3.9.2
-
 # scikit-learn for potential data scaling or model evaluation
 scikit-learn>=1.5.2
-
-# For testing
-pytest>=8.3.3
 
 # For interfacing with database.
 flask-sqlalchemy>=3.1.1
