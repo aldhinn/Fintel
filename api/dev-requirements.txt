@@ -1,5 +1,8 @@
 # matplotlib (for any visualization during testing or debugging)
 matplotlib>=3.9.2
 
-# For testing
+# For syntax testing.
+flake8>=7.1.1
+
+# For general testing
 pytest>=8.3.3
