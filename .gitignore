@@ -11,6 +11,3 @@
 
 # Git ignore vscode configurations.
 **.vscode
-
-# Git ignore data files to be analyzed.
-**.csv
