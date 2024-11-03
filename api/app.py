@@ -2,11 +2,7 @@
 
 from flask import Response, jsonify, request
 from utils.data import analyze_tickers_from_list
-from utils.flask_app import flask_app, TickerEntry, db, TickersTable
-from concurrent.futures import ThreadPoolExecutor
-
-# ThreadPoolExecutor instance for handling concurrent tasks
-executor = ThreadPoolExecutor()
+from utils.flask_app import flask_app, TickerEntry, db, TickersTable, threadExecutor
 
 @flask_app.route("/tickers", methods=["GET"])
 def get_tickers() -> Response:
@@ -69,7 +65,7 @@ def post_request() -> Response:
             # Commit everything that was just done to the live database.
             db.session.commit()
             # Run on the background.
-            executor.submit(analyze_tickers_from_list, ticker_names_to_be_analyzed)
+            threadExecutor.submit(analyze_tickers_from_list, ticker_names_to_be_analyzed)
 
             return jsonify({"success": True})
 
