@@ -32,42 +32,42 @@ class APISourceEnum(Enum):
         obj.description = description
         return obj
 
-def fetch_data(tickerName:str, start_date:str = "", end_date:str = "", \
+def fetch_data(asset_symbol:str, start_date:str = "", end_date:str = "", \
     source:APISourceEnum = APISourceEnum.YAHOO_FINANCE, api_key:str = "") -> DataFrame | None:
-    """Fetch ticker data from a specified API.
+    """Fetch asset symbol data from a specified API.
 
     Args:
-        name (str): The name of the ticker.
+        asset_symbol (str): The symbol for the asset.
         start_date (str, optional): The start date in 'YYYY-MM-DD' format.\
             If neither the start date nor the end date has been specified,\
-            this method will fetch for all data for this ticker.
+            this method will fetch for all data for this asset symbol.
         end_date (str, optional): The end date in 'YYYY-MM-DD' format.\
             If neither the start date nor the end date has been specified,\
-            this method will fetch for all data for this ticker.
+            this method will fetch for all data for this asset symbol.
         source (APISourceEnum, optional): The source for the finance data. \
             Defaults to APISourceEnum.YAHOO_FINANCE.
         api_key (str, optional): The api key for the API used to fetch financial data.
 
     Returns:
-        DataFrame | None: The ticker data object. None if fetching failed or yielded no data.
+        DataFrame | None: The asset symbol data object. None if fetching failed or yielded no data.
     """
 
     if source == APISourceEnum.YAHOO_FINANCE:
         try:
             # Fetching all data if either of the dates is set to "".
             if start_date == "" or end_date == "":
-                yfinance_data:DataFrame|None = yf.download(tickers=tickerName, period="max")
+                yfinance_data:DataFrame|None = yf.download(asset_symbol, period="max")
                 return yfinance_data
 
-            yfinance_data:DataFrame|None = yf.download(tickers=tickerName, start=start_date, end=end_date)
+            yfinance_data:DataFrame|None = yf.download(asset_symbol, start=start_date, end=end_date)
             return yfinance_data
         except Exception as e:
-            print(f"Error fetching data for {tickerName} from Yahoo Finance: {e}")
+            print(f"Error fetching data for {asset_symbol} from Yahoo Finance: {e}")
             return None
     elif source == APISourceEnum.ALPHA_VANTAGE:
         ts = TimeSeries(key=api_key, output_format='pandas')
         try:
-            data, _ = ts.get_daily_adjusted(symbol=tickerName, outputsize='full')
+            data, _ = ts.get_daily_adjusted(symbol=asset_symbol, outputsize='full')
             data.index = pd.to_datetime(data.index)
 
             # Fetching all data if either of the dates is set to "".
@@ -81,7 +81,7 @@ def fetch_data(tickerName:str, start_date:str = "", end_date:str = "", \
                 return None
             return data
         except Exception as e:
-            print(f"Error fetching data for {tickerName} from Alpha Vantage: {e}")
+            print(f"Error fetching data for {asset_symbol} from Alpha Vantage: {e}")
             return None
 
     return None
@@ -174,16 +174,16 @@ def preprocess_dataframe(df:DataFrame, columns_to_normalize:list[str],\
 
     return df
 
-def analyze_tickers_from_list(ticker_names_list:list[str]) -> None:
-    """Analyze the list of ticker specified.
+def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:
+    """Analyze the list of symbol names specified.
 
     Args:
-        ticker_names_list (list[str]): The name of the ticker to be analyzed.
+        asset_symbols_list (list[str]): The list of asset symbols to be analyzed.
     """
 
     # TODO: Delete later upon implementation completion.
-    for ticker_name in ticker_names_list:
-        print(f"Analyzing ticker name: {ticker_name}")
+    for asset_symbol in asset_symbols_list:
+        print(f"Analyzing asset symbol: {asset_symbol}")
 
     # TODO: Implement.
 

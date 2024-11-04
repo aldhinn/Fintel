@@ -1,9 +1,9 @@
-### This file contains sample RESTApi requests.
+### This file contains sample REST Api requests.
 
-### Get active tickers.
-GET http://localhost:5000/tickers
+### Get active asset symbols.
+GET http://localhost:5000/symbols
 
-### Request a single asset.
+### Request a single asset symbol.
 POST http://localhost:5000/request
 Content-Type: application/json
 
@@ -11,7 +11,7 @@ Content-Type: application/json
     "AAPL"
 ]
 
-### Request multiple tickers.
+### Request for multiple asset symbols.
 POST http://localhost:5000/request
 Content-Type: application/json
 
@@ -20,7 +20,7 @@ Content-Type: application/json
     "GOOGL"
 ]
 
-### Empty asset list.
+### Empty list.
 POST http://localhost:5000/request
 Content-Type: application/json
 

@@ -14,14 +14,14 @@ class ConnectScreen extends StatefulWidget {
 /// The `_ConnectScreenState` manages the user interface for connecting
 /// to a specified server. It allows users to input the hostname and port
 /// of the Fintel server, with default values of 'localhost' and '5000'
-/// if left empty. Upon successful connection, it retrieves tickers
+/// if left empty. Upon successful connection, it retrieves asset symbols
 /// from the server and navigates to the HomeScreen to display them.
 ///
 /// The main responsibilities of this class include:
 /// - Collecting user input for the hostname and port.
 /// - Attempting to connect to the specified server.
 /// - Handling successful and failed connection attempts.
-/// - Navigating to the HomeScreen with the retrieved tickers.
+/// - Navigating to the HomeScreen with the retrieved asset symbols.
 class _ConnectScreenState extends State<ConnectScreen> {
   final _hostnameController = TextEditingController();
   final _portController = TextEditingController();
@@ -29,8 +29,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
   /// Attempts to connect to the specified server using the provided
   /// hostname and port.
   ///
-  /// This method sends a GET request to the server's tickers endpoint
-  /// and retrieves ticker names. If the connection is successful, it
+  /// This method sends a GET request to the server's asset symbols endpoint
+  /// and retrieves asset symbols. If the connection is successful, it
   /// navigates to the HomeScreen. If it fails, it shows an error dialog
   /// to inform the user.
   Future<void> _connectToServer() async {
@@ -38,7 +38,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
         ? 'localhost'
         : _hostnameController.text;
     final port = _portController.text.isEmpty ? '5000' : _portController.text;
-    final url = Uri.parse('http://$hostname:$port/tickers');
+    final url = Uri.parse('http://$hostname:$port/symbols');
 
     try {
       final response = await http.get(url);
@@ -47,16 +47,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
         final decodedData = jsonDecode(response.body);
 
         if (decodedData is Map &&
-            decodedData.containsKey('tickers') &&
-            decodedData['tickers'] is List) {
-          List<String> tickers = List<String>.from(decodedData['tickers']);
+            decodedData.containsKey('symbols') &&
+            decodedData['symbols'] is List) {
+          List<String> assetSymbols = List<String>.from(decodedData['symbols']);
 
-          // Navigate to HomeScreen with the list of tickers.
+          // Navigate to HomeScreen with the list of asset symbols.
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  HomeScreen(tickers: tickers, hostname: hostname, port: port),
+              builder: (context) => HomeScreen(
+                  assetSymbols: assetSymbols, hostname: hostname, port: port),
             ),
           );
         } else {

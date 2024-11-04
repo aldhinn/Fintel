@@ -4,13 +4,15 @@ import 'package:fintel/screens/home_screen.dart';
 
 void main() {
   group('HomeScreen Tests', () {
-    testWidgets('Loading indicator is shown during ticker fetch',
+    testWidgets('Loading indicator is shown during asset symbols fetch',
         (WidgetTester tester) async {
-      // Mock the HomeScreen with some sample tickers
-      final sampleTickers = ['appl', 'googl'];
+      // Mock the HomeScreen with some sample asset symbols
+      final sampleAssetSymbols = ['appl', 'googl'];
       await tester.pumpWidget(MaterialApp(
           home: HomeScreen(
-              tickers: sampleTickers, hostname: 'localhost', port: '5000')));
+              assetSymbols: sampleAssetSymbols,
+              hostname: 'localhost',
+              port: '5000')));
 
       // Initially, loading indicator should be present
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -23,17 +25,20 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('Tickers Displayed', (WidgetTester tester) async {
-      // Mock the HomeScreen with some sample tickers
-      final sampleTickers = ['appl', 'googl'];
+    testWidgets('Asset Symbols Displayed', (WidgetTester tester) async {
+      // Mock the HomeScreen with some sample asset symbols
+      final sampleAssetSymbols = ['appl', 'googl'];
       await tester.pumpWidget(MaterialApp(
           home: HomeScreen(
-              tickers: sampleTickers, hostname: 'localhost', port: '5000')));
+              assetSymbols: sampleAssetSymbols,
+              hostname: 'localhost',
+              port: '5000')));
 
-      // Simulate fetching tickers and rebuilding with sample data
-      await tester.pumpAndSettle(); // Simulate waiting for the tickers to load
+      // Simulate fetching asset symbols and rebuilding with sample data
+      await tester
+          .pumpAndSettle(); // Simulate waiting for the asset symbols to load
 
-      // Verify that the tickers are displayed
+      // Verify that the asset symbols are displayed
       expect(find.text('appl'), findsOneWidget);
       expect(find.text('googl'), findsOneWidget);
     });

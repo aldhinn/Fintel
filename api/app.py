@@ -1,26 +1,26 @@
 #!/usr/bin/python
 
 from flask import Response, jsonify, request
-from utils.data import analyze_tickers_from_list
-from utils.flask_app import flask_app, TickerEntry, db, TickersTable, threadExecutor
+from utils.data import analyze_symbols_from_list
+from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable, threadExecutor
 
-@flask_app.route("/tickers", methods=["GET"])
-def get_tickers() -> Response:
-    """Get the list of financial tickers to be analyzed.
+@flask_app.route("/symbols", methods=["GET"])
+def get_symbols() -> Response:
+    """Get the list of financial asset symbols to be analyzed.
 
     Returns:
-        Response: The response json containing the list of tickers analyzed.
+        Response: The response json containing the list of asset symbols analyzed.
     """
 
-    # Query only the "name" column with active status.
-    ticker_names = TickersTable.query.with_entities(TickerEntry.name).filter_by(status="active").all()
-    # Format the result as a list of names
-    ticker_names_list = [name[0] for name in ticker_names]
-    return jsonify({"tickers": ticker_names_list})
+    # Query only the "symbol" column with active status.
+    asset_symbols = AssetsDbTable.query.with_entities(AssetDbEntry.symbol).filter_by(status="active").all()
+    # Format the result as a list of asset symbols
+    asset_symbols_list = [symbol[0] for symbol in asset_symbols]
+    return jsonify({"symbols": asset_symbols_list})
 
 @flask_app.route("/request", methods=["POST"])
 def post_request() -> Response:
-    """Request for a ticker to be analyzed.
+    """Request for a asset symbol to be analyzed.
 
     Returns:
         Response: The response json containing whether the request was successful and\
@@ -28,44 +28,44 @@ def post_request() -> Response:
     """
 
     # Retrieve the json request object.
-    requested_ticker_names_list = request.get_json()
+    requested_asset_symbols_list = request.get_json()
 
-    if isinstance(requested_ticker_names_list, list): # Check if this is a list object.
-        if not requested_ticker_names_list:
+    if isinstance(requested_asset_symbols_list, list): # Check if this is a list object.
+        if not requested_asset_symbols_list:
             return jsonify({
                 "success": False,
-                "message": "Provided empty tickers list."
+                "message": "Provided empty asset symbols list."
             })
 
-        ticker_names_to_be_analyzed:list[str] = []
+        asset_symbols_to_be_analyzed:list[str] = []
 
-        # Iterate over the tickers to check for invalid values.
-        for requested_ticker_name in requested_ticker_names_list:
-            if not isinstance(requested_ticker_name, str):
+        # Iterate over the asset symbols to check for invalid values.
+        for requested_asset_symbol in requested_asset_symbols_list:
+            if not isinstance(requested_asset_symbol, str):
                 db.session.rollback()
                 return jsonify({
                     "success": False,
-                    "message": f"Invalid ticker name value: {requested_ticker_name}"
+                    "message": f"Invalid asset symbol value: {requested_asset_symbol}"
                 })
 
-            # Check if the username already exists
-            existing_user = TickersTable.query.filter_by(name=requested_ticker_name).first()
-            if existing_user:
+            # Check if the asset symbol already exists
+            queried_symbol_entry = AssetsDbTable.query.filter_by(symbol=requested_asset_symbol).first()
+            if queried_symbol_entry:
                 # Continue to the next entry.
                 continue
 
             # Construct the database model.
-            new_ticker_entry = TickerEntry(name=requested_ticker_name, status="pending")
+            new_asset_symbol_entry = AssetDbEntry(symbol=requested_asset_symbol, status="pending")
             # Add to the database.
-            db.session.add(new_ticker_entry)
+            db.session.add(new_asset_symbol_entry)
             # Add to the list to be analyzed.
-            ticker_names_to_be_analyzed.append(requested_ticker_name)
+            asset_symbols_to_be_analyzed.append(requested_asset_symbol)
 
         try:
             # Commit everything that was just done to the live database.
             db.session.commit()
             # Run on the background.
-            threadExecutor.submit(analyze_tickers_from_list, ticker_names_to_be_analyzed)
+            threadExecutor.submit(analyze_symbols_from_list, asset_symbols_to_be_analyzed)
 
             return jsonify({"success": True})
 
@@ -79,7 +79,7 @@ def post_request() -> Response:
     else:
         return jsonify({
             "success": False,
-            "message": "The requested tickers must be sent via a list of strings."
+            "message": "The requested asset symbols must be sent via a list of strings."
         })
 
 if __name__ == "__main__":
