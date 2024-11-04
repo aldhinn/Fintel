@@ -20,13 +20,22 @@ with flask_app.app_context():
     Base.prepare(db.engine, reflect=True)
     # Access reflected tables as classes
     AssetDbEntry = Base.classes.assets
+    PricePointDbEntry = Base.classes.price_points
 
 class AssetsDbTable(db.Model):
     """The model to the assets table.
     """
+
     __tablename__ = "assets"
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(100), nullable=False)
+
+class PricePointsDbTable(db.Model):
+    """The model to the price_points table.
+    """
+
+    __tablename__ = "price_points"
+    id = db.Column(db.Integer, primary_key=True)
 
 # ThreadPoolExecutor instance for handling concurrent tasks
 threadExecutor = ThreadPoolExecutor()

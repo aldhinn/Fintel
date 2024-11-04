@@ -12,8 +12,8 @@ def get_symbols() -> Response:
         Response: The response json containing the list of asset symbols analyzed.
     """
 
-    # Query only the "symbol" column with active status.
-    asset_symbols = AssetsDbTable.query.with_entities(AssetDbEntry.symbol).filter_by(status="active").all()
+    # Query only the "symbol" column with active processing status.
+    asset_symbols = AssetsDbTable.query.with_entities(AssetDbEntry.symbol).filter_by(processing_status="active").all()
     # Format the result as a list of asset symbols
     asset_symbols_list = [symbol[0] for symbol in asset_symbols]
     return jsonify({"symbols": asset_symbols_list})
@@ -55,7 +55,7 @@ def post_request() -> Response:
                 continue
 
             # Construct the database model.
-            new_asset_symbol_entry = AssetDbEntry(symbol=requested_asset_symbol, status="pending")
+            new_asset_symbol_entry = AssetDbEntry(symbol=requested_asset_symbol, processing_status="pending")
             # Add to the database.
             db.session.add(new_asset_symbol_entry)
             # Add to the list to be analyzed.
