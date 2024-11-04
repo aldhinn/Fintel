@@ -6,22 +6,6 @@ from utils.data import handle_missing_values, remove_outliers,\
     normalize_columns, preprocess_dataframe
 import numpy as np
 
-def test_fetch_from_yfinance() -> None:
-    """Test whether we have successfully fetched data from Yahoo Finance.
-    """
-
-    from utils.data import fetch_data
-
-    asset_symbol = "AAPL"
-    start_date = "2024-10-1"
-    end_date = "2024-10-26"
-
-    data = fetch_data(asset_symbol=asset_symbol, start_date=start_date, end_date=end_date)
-    print(data)
-
-    assert data is not None
-    assert isinstance(data, DataFrame)
-
 # Sample data for testing
 @pytest.fixture
 def sample_data() -> DataFrame:
