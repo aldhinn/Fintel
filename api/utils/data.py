@@ -153,6 +153,7 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
             ref_asset_entry.processing_status = 'active'
             db.session.commit()
         except Exception as e:
+            db.session.rollback()
             print(f"Failed to update asset entry with exception: {e}")
 
 def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:
