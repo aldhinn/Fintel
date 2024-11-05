@@ -4,7 +4,7 @@ services:
   fintel-api-service:
     container_name: fintel-api-service
     build:
-      context: ./
+      context: ./api
     environment:
       - SERVICE_PORT=5000
     ports:
@@ -30,9 +30,9 @@ services:
 
 secrets:
   db_user:
-    file: ./secrets/db_user
+    file: ./api/secrets/db_user
   db_password:
-    file: ./secrets/db_password
+    file: ./api/secrets/db_password
 
 volumes:
   fintel-database-data:
