@@ -8,7 +8,7 @@ POST http://localhost:5000/request
 Content-Type: application/json
 
 [
-    "AAPL"
+    "GOOGL"
 ]
 
 ### Request for multiple asset symbols.
@@ -27,7 +27,7 @@ Content-Type: application/json
 [
 ]
 
-### Invalid request format.
+### Request should come as an array.
 POST http://localhost:5000/request
 Content-Type: application/json
 
@@ -43,3 +43,59 @@ Content-Type: application/json
     "GOOGL",
     {"name": "AAPL"}
 ]
+
+### Request for asset symbol price data.
+POST http://localhost:5000/data
+Content-Type: application/json
+
+{
+    "symbol": "GOOGL",
+    "start_date": "2024-10-20",
+    "end_date": "2024-11-01"
+}
+
+### Request for asset symbol price data.
+POST http://localhost:5000/data
+Content-Type: application/json
+
+{
+    "symbol": "AAPL",
+    "start_date": "2024-10-20",
+    "end_date": "2024-11-01"
+}
+
+### Request should come as an object.
+POST http://localhost:5000/data
+Content-Type: application/json
+
+[
+
+]
+
+### Request should include symbol, start_date and end_date
+POST http://localhost:5000/data
+Content-Type: application/json
+
+{
+    "symbol": "AAPL",
+    "end_date": "2024-11-04"
+}
+
+### Request should include symbol, start_date and end_date
+POST http://localhost:5000/data
+Content-Type: application/json
+
+{
+    "symbol": "GOOGL",
+    "start_date": "2024-11-01"
+}
+
+### Request data should be strings.
+POST http://localhost:5000/data
+Content-Type: application/json
+
+{
+    "symbol": "GOOGL",
+    "start_date": ["2024-11-01"],
+    "end_date": true
+}
