@@ -174,6 +174,68 @@ def preprocess_dataframe(df:DataFrame, columns_to_normalize:list[str],\
 
     return df
 
+def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
+    """Fetch data from yahoo finance and store in the database.
+
+    Args:
+        asset_symbol (str): The symbol of the asset to be retrieved online.
+    """
+
+    from utils.flask_app import AssetsDbTable, AssetDbEntry, db, flask_app, PricePointDbEntry
+
+    with flask_app.app_context():
+        try:
+            # Retrieve the asset id from the database.
+            asset_id = AssetsDbTable.query.with_entities(AssetDbEntry.id).filter_by(symbol=asset_symbol).first().id
+        except Exception as e:
+            print(f"Failed to retrieve asset id with message: {e}")
+            return None
+
+        try:
+            # Fetch all historical data
+            data:DataFrame|None = yf.download(asset_symbol)
+        except Exception as e:
+            print(f"Failed to download from yahoo finance with message: {e}")
+
+        # Halt from here on if retrieved nothing.
+        if data is None:
+            return
+
+        # Reset index to turn the date into a column
+        data.reset_index(inplace=True)
+        # Prepare the DataFrame
+        df_price_history = data[['Date', 'Open', 'Close', 'High', 'Low', 'Adj Close', 'Volume']].copy()
+        df_price_history.columns = ['date', 'open_price', 'close_price', 'high_price', 'low_price', 'adjusted_close', 'volume']
+
+        try:
+            # Iterate over the data frame to be stored in the database.
+            for _, row in df_price_history.iterrows():
+                price_record = PricePointDbEntry(
+                    asset_id=asset_id,
+                    date=row['date'],
+                    open_price=row['open_price'],
+                    close_price=row['close_price'],
+                    high_price=row['high_price'],
+                    low_price=row['low_price'],
+                    adjusted_close=row['adjusted_close'],
+                    volume=row['volume'],
+                    source='yahoo_finance',
+                )
+                db.session.add(price_record)
+            db.session.commit()
+        except Exception as e:
+            print(f"Error in submitting price point entries: {e}")
+            db.session.rollback()
+            return
+
+        try:
+            # The reference to the asset entry in the database.
+            ref_asset_entry = AssetsDbTable.query.get(asset_id)
+            ref_asset_entry.processing_status = 'active'
+            db.session.commit()
+        except Exception as e:
+            print(f"Failed to update asset entry with exception: {e}")
+
 def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:
     """Analyze the list of symbol names specified.
 
@@ -181,11 +243,8 @@ def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:
         asset_symbols_list (list[str]): The list of asset symbols to be analyzed.
     """
 
-    # TODO: Delete later upon implementation completion.
     for asset_symbol in asset_symbols_list:
-        print(f"Analyzing asset symbol: {asset_symbol}")
-
-    # TODO: Implement.
+        _fetch_from_yahoo_finance(asset_symbol=asset_symbol)
 
 if __name__ == "__main__":
     for _, source in enumerate(APISourceEnum):

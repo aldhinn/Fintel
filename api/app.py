@@ -2,7 +2,8 @@
 
 from flask import Response, jsonify, request
 from utils.data import analyze_symbols_from_list
-from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable, threadExecutor
+from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable
+import threading
 
 @flask_app.route("/symbols", methods=["GET"])
 def get_symbols() -> Response:
@@ -65,7 +66,7 @@ def post_request() -> Response:
             # Commit everything that was just done to the live database.
             db.session.commit()
             # Run on the background.
-            threadExecutor.submit(analyze_symbols_from_list, asset_symbols_to_be_analyzed)
+            threading.Thread(target=analyze_symbols_from_list, args=(asset_symbols_to_be_analyzed,)).run()
 
             return jsonify({"success": True})
 

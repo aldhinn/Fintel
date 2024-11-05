@@ -4,7 +4,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
 from utils.config import Config
-from concurrent.futures import ThreadPoolExecutor
 
 # Create the flask application instance.
 flask_app = Flask(__name__)
@@ -28,7 +27,8 @@ class AssetsDbTable(db.Model):
 
     __tablename__ = "assets"
     id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(100), nullable=False)
+    symbol = db.Column(db.String(15), nullable=False)
+    processing_status = db.Column(db.Enum('active', 'pending', name='ASSET_STATUS_TYPE'), nullable=False)
 
 class PricePointsDbTable(db.Model):
     """The model to the price_points table.
@@ -36,6 +36,3 @@ class PricePointsDbTable(db.Model):
 
     __tablename__ = "price_points"
     id = db.Column(db.Integer, primary_key=True)
-
-# ThreadPoolExecutor instance for handling concurrent tasks
-threadExecutor = ThreadPoolExecutor()
