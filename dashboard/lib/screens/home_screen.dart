@@ -168,6 +168,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Displays a loading screen dialog with a specified message.
+  void _showLoadingDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => Dialog(
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(message, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 20),
+                    const CircularProgressIndicator(),
+                  ],
+                ),
+              ),
+            ));
+  }
+
   /// Displays a dialog allowing the user to request new asset symbols.
   ///
   /// This method opens a modal dialog where the user can enter the asset symbols
@@ -260,6 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   jsonEncode(_newAssetSymbolsToBeAdded);
 
                               try {
+                                _showLoadingDialog(
+                                    "Requesting for the server to download online data");
                                 final Response response = await http.post(
                                   url,
                                   headers: <String, String>{
@@ -267,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                   body: payload,
                                 );
+                                Navigator.of(context).pop();
 
                                 if (response.statusCode == 200) {
                                   Navigator.of(context).pop();
