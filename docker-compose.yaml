@@ -6,9 +6,9 @@ services:
     build:
       context: ./api
     environment:
-      - SERVICE_PORT=5000
+      - SERVICE_PORT=61000
     ports:
-      - "5000:5000"
+      - "61000:61000"
     depends_on:
       - fintel-database
 

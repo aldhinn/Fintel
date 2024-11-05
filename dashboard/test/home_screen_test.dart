@@ -12,7 +12,7 @@ void main() {
           home: HomeScreen(
               assetSymbols: sampleAssetSymbols,
               hostname: 'localhost',
-              port: '5000')));
+              port: '61000')));
 
       // Initially, loading indicator should be present
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -32,7 +32,7 @@ void main() {
           home: HomeScreen(
               assetSymbols: sampleAssetSymbols,
               hostname: 'localhost',
-              port: '5000')));
+              port: '61000')));
 
       // Simulate fetching asset symbols and rebuilding with sample data
       await tester

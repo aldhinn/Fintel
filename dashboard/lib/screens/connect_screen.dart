@@ -13,7 +13,7 @@ class ConnectScreen extends StatefulWidget {
 
 /// The `_ConnectScreenState` manages the user interface for connecting
 /// to a specified server. It allows users to input the hostname and port
-/// of the Fintel server, with default values of 'localhost' and '5000'
+/// of the Fintel server, with default values of 'localhost' and '61000'
 /// if left empty. Upon successful connection, it retrieves asset symbols
 /// from the server and navigates to the HomeScreen to display them.
 ///
@@ -37,7 +37,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
     final hostname = _hostnameController.text.isEmpty
         ? 'localhost'
         : _hostnameController.text;
-    final port = _portController.text.isEmpty ? '5000' : _portController.text;
+    final port = _portController.text.isEmpty ? '61000' : _portController.text;
     final url = Uri.parse('http://$hostname:$port/symbols');
 
     try {
@@ -131,7 +131,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             TextField(
               controller: _portController,
               decoration: const InputDecoration(
-                labelText: "Port (default: 5000)",
+                labelText: "Port (default: 61000)",
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,

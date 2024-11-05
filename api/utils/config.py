@@ -33,4 +33,4 @@ class Config:
     """
     SQLALCHEMY_DATABASE_URI:str = f"postgresql://{_db_user}:{_db_password}@{_db_host}:{_db_port}/fintel-db"
     SQLALCHEMY_TRACK_MODIFICATIONS:bool = False
-    PORT:int = int(os.getenv("SERVICE_PORT", "5000"))
+    PORT:int = int(os.getenv("SERVICE_PORT", "61000"))
