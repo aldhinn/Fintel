@@ -36,3 +36,11 @@ class PricePointsDbTable(db.Model):
 
     __tablename__ = "price_points"
     id = db.Column(db.Integer, primary_key=True)
+    asset_id = asset_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    open_price = db.Column(db.Float, nullable=False)
+    close_price = db.Column(db.Float, nullable=False)
+    high_price = db.Column(db.Float, nullable=False)
+    low_price = db.Column(db.Float, nullable=False)
+    adjusted_close = db.Column(db.Float, nullable=True)
+    volume = db.Column(db.Integer, nullable=True)
