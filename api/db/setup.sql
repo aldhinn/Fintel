@@ -52,7 +52,11 @@ CREATE TABLE IF NOT EXISTS assets (
 /* The table containing information about asset price points. */
 CREATE TABLE IF NOT EXISTS price_points (
     id SERIAL PRIMARY KEY,
+
+    /* If an asset entry is deleted, every price point entry
+    relating to that asset is to be deleted.*/
     asset_id INT REFERENCES assets(id) ON DELETE CASCADE,
+
     date DATE NOT NULL,
     open_price NUMERIC(12, 4) NOT NULL,
     close_price NUMERIC(12, 4) NOT NULL,
