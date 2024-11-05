@@ -2,7 +2,7 @@
 
 from flask import Response, jsonify, request
 from utils.data import analyze_symbols_from_list
-from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable
+from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable, PricePointsDbTable
 import threading
 
 @flask_app.route("/symbols", methods=["GET"])
@@ -81,6 +81,90 @@ def post_request() -> Response:
         return jsonify({
             "success": False,
             "message": "The requested asset symbols must be sent via a list of strings."
+        })
+
+@flask_app.route("/data", methods=["POST"])
+def post_data() -> Response:
+    """The endpoint to obtain price data of the asset symbol.
+
+    Returns:
+        Response: The response json containing whether the request was successful and\
+            the accompanying error message when it's not successful. It also contains\
+            the array of price points.
+    """
+
+    data = request.get_json()
+    # The request should come as an object.
+    if isinstance(data, list):
+        return jsonify({
+            "success": False,
+            "message": "Request should come as an object."
+        })
+
+    symbol = data.get('symbol')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+
+    # Validate the required fields
+    if symbol is None or start_date is None or end_date is None:
+        return jsonify({
+            "success": False,
+            "message": "The fields symbol, start_date, and end_date are required."
+        })
+
+    # The data should come as strings.
+    if not isinstance(symbol, str) or not isinstance(start_date, str) or not isinstance(end_date, str):
+        return jsonify({
+            "success": False,
+            "message": "Data provided should all be strings."
+        })
+
+    try:
+        # Retrieve the asset id from the database.
+        asset_entry = AssetsDbTable.query.with_entities(AssetDbEntry.id).filter_by(symbol=symbol).first()
+        if asset_entry is None:
+            return jsonify({
+                "success": False,
+                "message": "The symbol does not exist in the database."
+            })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": f"Failed to retrieve asset entries with exception: {e}"
+        })
+
+    try:
+        price_point_entries = PricePointsDbTable.query.filter(
+            PricePointsDbTable.asset_id==asset_entry.id,
+            PricePointsDbTable.date >= start_date,
+            PricePointsDbTable.date <= end_date
+        ).all()
+
+        # Convert prices to an array of dictionaries
+        price_data = [
+            {
+                "date": record.date.strftime("%Y-%m-%d"),
+                "open_price": record.open_price,
+                "close_price": record.close_price,
+                "high_price": record.high_price,
+                "low_price": record.low_price,
+                "adjusted_close": record.adjusted_close,
+                "volume": record.volume
+            } for record in price_point_entries
+        ]
+
+        return jsonify({
+            "success": True,
+            "prices": price_data
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": f"Failed to retrieve price point entries with exception: {e}"
         })
 
 if __name__ == "__main__":
