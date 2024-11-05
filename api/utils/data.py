@@ -1,90 +1,9 @@
 #!/usr/bin/python
 
 import yfinance as yf
-from alpha_vantage.timeseries import TimeSeries
-import pandas as pd
-from enum import Enum
 from pandas import DataFrame
 from sklearn.preprocessing import MinMaxScaler
 from typing import Literal
-
-class APISourceEnum(Enum):
-    """An enum determining API source for the finance data.
-    """
-
-    # Fetching data from Yahoo Finance.
-    YAHOO_FINANCE=(1, "Fetching data from Yahoo Finance.")
-    # Fetching data from Alpha Vantage
-    ALPHA_VANTAGE=(2, "Fetching data from Alpha Vantage")
-
-    def __new__(self, value:int, description:str):
-        """Constructs a new enum object.
-
-        Args:
-            value (int): The enum integer value.
-            description (str): The description of the enum value.
-
-        Returns:
-            APISourceEnum: The enum object.
-        """
-        obj = object.__new__(self)
-        obj._value_ = value
-        obj.description = description
-        return obj
-
-def fetch_data(asset_symbol:str, start_date:str = "", end_date:str = "", \
-    source:APISourceEnum = APISourceEnum.YAHOO_FINANCE, api_key:str = "") -> DataFrame | None:
-    """Fetch asset symbol data from a specified API.
-
-    Args:
-        asset_symbol (str): The symbol for the asset.
-        start_date (str, optional): The start date in 'YYYY-MM-DD' format.\
-            If neither the start date nor the end date has been specified,\
-            this method will fetch for all data for this asset symbol.
-        end_date (str, optional): The end date in 'YYYY-MM-DD' format.\
-            If neither the start date nor the end date has been specified,\
-            this method will fetch for all data for this asset symbol.
-        source (APISourceEnum, optional): The source for the finance data. \
-            Defaults to APISourceEnum.YAHOO_FINANCE.
-        api_key (str, optional): The api key for the API used to fetch financial data.
-
-    Returns:
-        DataFrame | None: The asset symbol data object. None if fetching failed or yielded no data.
-    """
-
-    if source == APISourceEnum.YAHOO_FINANCE:
-        try:
-            # Fetching all data if either of the dates is set to "".
-            if start_date == "" or end_date == "":
-                yfinance_data:DataFrame|None = yf.download(asset_symbol, period="max")
-                return yfinance_data
-
-            yfinance_data:DataFrame|None = yf.download(asset_symbol, start=start_date, end=end_date)
-            return yfinance_data
-        except Exception as e:
-            print(f"Error fetching data for {asset_symbol} from Yahoo Finance: {e}")
-            return None
-    elif source == APISourceEnum.ALPHA_VANTAGE:
-        ts = TimeSeries(key=api_key, output_format='pandas')
-        try:
-            data, _ = ts.get_daily_adjusted(symbol=asset_symbol, outputsize='full')
-            data.index = pd.to_datetime(data.index)
-
-            # Fetching all data if either of the dates is set to "".
-            if start_date == "" or end_date == "":
-                return data
-
-            # Filter data within the specified date range
-            data = data.loc[(data.index >= start_date) & (data.index <= end_date)]
-            if data.empty:
-                print("Returning None as data is empty.")
-                return None
-            return data
-        except Exception as e:
-            print(f"Error fetching data for {asset_symbol} from Alpha Vantage: {e}")
-            return None
-
-    return None
 
 def handle_missing_values(df:DataFrame, strategy:Literal["fill", "drop"]='drop', fill_value:float=0) -> DataFrame:
     """Handle missing values in the DataFrame.
@@ -245,7 +164,3 @@ def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:
 
     for asset_symbol in asset_symbols_list:
         _fetch_from_yahoo_finance(asset_symbol=asset_symbol)
-
-if __name__ == "__main__":
-    for _, source in enumerate(APISourceEnum):
-        print(f"APISourceEnum: {source}, Value: {source.value}, Description: {source.description}")
