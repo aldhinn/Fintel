@@ -25,6 +25,9 @@ class AssetDetailsScreen extends StatefulWidget {
 
 /// `AssetDetailsScreen` state.
 class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
+  /// The description of the asset symbol.
+  String _assetDescription = "";
+
   /// List of points representing opening price history for the asset.
   List<FlSpot> _openingPriceData = [];
 
@@ -96,6 +99,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
       List pricePoints = jsonData['prices'];
 
       setState(() {
+        _assetDescription = jsonData['description'];
         _openingPriceData = pricePoints
             .asMap()
             .entries
@@ -149,7 +153,20 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.assetSymbol),
+        title: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: widget.assetSymbol,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                text: ' - $_assetDescription',
+                style: const TextStyle(fontWeight: FontWeight.normal),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

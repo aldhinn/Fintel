@@ -120,8 +120,8 @@ def post_data() -> Response:
         })
 
     try:
-        # Retrieve the asset id from the database.
-        asset_entry = AssetsDbTable.query.with_entities(AssetDbEntry.id).filter_by(symbol=symbol).first()
+        # Retrieve the asset entry from the database.
+        asset_entry = AssetsDbTable.query.filter_by(symbol=symbol).first()
         if asset_entry is None:
             return jsonify({
                 "success": False,
@@ -157,6 +157,7 @@ def post_data() -> Response:
 
         return jsonify({
             "success": True,
+            "description": asset_entry.description,
             "prices": price_data
         })
 

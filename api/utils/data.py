@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import yfinance as yf
 from pandas import DataFrame
 from sklearn.preprocessing import MinMaxScaler
 from typing import Literal
@@ -100,6 +99,8 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
         asset_symbol (str): The symbol of the asset to be retrieved online.
     """
 
+    import yfinance as yf
+    from yfinance import Ticker
     from utils.flask_app import AssetsDbTable, AssetDbEntry, db, flask_app, PricePointDbEntry
 
     with flask_app.app_context():
@@ -111,7 +112,7 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
             return None
 
         try:
-            # Fetch all historical data
+            # Fetch all historical data.
             data:DataFrame|None = yf.download(asset_symbol)
         except Exception as e:
             print(f"Failed to download from yahoo finance with message: {e}")
@@ -148,9 +149,16 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
             return
 
         try:
+            # Fetch metadata.
+            metadata:dict = Ticker(asset_symbol).info
             # The reference to the asset entry in the database.
             ref_asset_entry = AssetsDbTable.query.get(asset_id)
+            description = metadata.get('longName', 'Description not available')
+
+            # Update asset entry.
             ref_asset_entry.processing_status = 'active'
+            ref_asset_entry.description = description
+
             db.session.commit()
         except Exception as e:
             db.session.rollback()

@@ -29,6 +29,7 @@ class AssetsDbTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(15), nullable=False)
     processing_status = db.Column(db.Enum('active', 'pending', name='ASSET_STATUS_TYPE'), nullable=False)
+    description = db.Column(db.String(50), nullable=True)
 
 class PricePointsDbTable(db.Model):
     """The model to the price_points table.
