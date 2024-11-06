@@ -11,6 +11,8 @@
 
 [![API](https://github.com/aldhinn/Fintel/actions/workflows/api.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/api.yaml) [![Dashboard](https://github.com/aldhinn/Fintel/actions/workflows/dashboard.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/dashboard.yaml)
 
+![Asset Details Screen](./screenshots/asset-details.png)
+
 ## 📌 Features
 - **Real-Time Stock Data**: Live market data pulled directly from a financial API
 - **Predictive Insights**: LSTM neural network model for next-day stock price predictions
