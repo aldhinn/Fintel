@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
-from utils.config import Config
+from utils.config import Config, flask_app
 
-# Create the flask application instance.
-flask_app = Flask(__name__)
 # Configure the flask app.
 flask_app.config.from_object(Config)
 

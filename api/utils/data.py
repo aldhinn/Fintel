@@ -101,7 +101,8 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
 
     import yfinance as yf
     from yfinance import Ticker
-    from utils.flask_app import AssetsDbTable, AssetDbEntry, db, flask_app, PricePointDbEntry
+    from utils.config import flask_app
+    from utils.db_models import AssetsDbTable, AssetDbEntry, db, PricePointDbEntry
 
     with flask_app.app_context():
         try:

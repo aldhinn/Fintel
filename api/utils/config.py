@@ -28,9 +28,15 @@ _db_port = 5432
 
 import os
 
+from flask import Flask
+
 class Config:
     """The configuration class of the application.
     """
     SQLALCHEMY_DATABASE_URI:str = f"postgresql://{_db_user}:{_db_password}@{_db_host}:{_db_port}/fintel-db"
     SQLALCHEMY_TRACK_MODIFICATIONS:bool = False
     PORT:int = int(os.getenv("SERVICE_PORT", "61000"))
+
+
+# Create the flask application instance.
+flask_app = Flask(__name__)

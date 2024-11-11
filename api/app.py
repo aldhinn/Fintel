@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
 from flask import Response, jsonify, request
+from utils.config import flask_app
 from utils.data import analyze_symbols_from_list
-from utils.flask_app import flask_app, AssetDbEntry, db, AssetsDbTable, PricePointsDbTable
+from utils.db_models import AssetDbEntry, db, AssetsDbTable, PricePointsDbTable
 import threading
 
 @flask_app.route("/symbols", methods=["GET"])
