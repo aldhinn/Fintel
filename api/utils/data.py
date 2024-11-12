@@ -102,12 +102,12 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
     import yfinance as yf
     from yfinance import Ticker
     from utils.config import flask_app
-    from utils.db_models import AssetsDbTable, AssetDbEntry, db, PricePointDbEntry
+    from utils.db_models import AssetsDbTable, database, PricePointsDbTable
 
     with flask_app.app_context():
         try:
             # Retrieve the asset id from the database.
-            asset_id = AssetsDbTable.query.with_entities(AssetDbEntry.id).filter_by(symbol=asset_symbol).first().id
+            asset_id = AssetsDbTable.query.with_entities(AssetsDbTable.id).filter_by(symbol=asset_symbol).first().id
         except Exception as e:
             print(f"Failed to retrieve asset id with message: {e}")
             return None
@@ -131,7 +131,7 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
         try:
             # Iterate over the data frame to be stored in the database.
             for _, row in df_price_history.iterrows():
-                price_record = PricePointDbEntry(
+                price_record = PricePointsDbTable(
                     asset_id=asset_id,
                     date=row['date'],
                     open_price=row['open_price'],
@@ -142,11 +142,11 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
                     volume=row['volume'],
                     source='yahoo_finance',
                 )
-                db.session.add(price_record)
-            db.session.commit()
+                database.session.add(price_record)
+            database.session.commit()
         except Exception as e:
             print(f"Error in submitting price point entries: {e}")
-            db.session.rollback()
+            database.session.rollback()
             return
 
         try:
@@ -160,9 +160,9 @@ def _fetch_from_yahoo_finance(asset_symbol:str) -> None:
             ref_asset_entry.processing_status = 'active'
             ref_asset_entry.description = description
 
-            db.session.commit()
+            database.session.commit()
         except Exception as e:
-            db.session.rollback()
+            database.session.rollback()
             print(f"Failed to update asset entry with exception: {e}")
 
 def analyze_symbols_from_list(asset_symbols_list:list[str]) -> None:

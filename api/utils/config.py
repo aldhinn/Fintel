@@ -40,3 +40,6 @@ class Config:
 
 # Create the flask application instance.
 flask_app = Flask(__name__)
+
+# Configure the flask app.
+flask_app.config.from_object(Config)

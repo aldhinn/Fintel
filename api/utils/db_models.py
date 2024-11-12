@@ -1,44 +1,35 @@
 #!/usr/bin/python
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.automap import automap_base
-from utils.config import Config, flask_app
 
-# Configure the flask app.
-flask_app.config.from_object(Config)
+# The interface to the database session.
+database = SQLAlchemy()
 
-# The database interface.
-db = SQLAlchemy(flask_app)
-
-# Reflect the existing database tables
-Base = automap_base()
-with flask_app.app_context():
-    Base.prepare(db.engine, reflect=True)
-    # Access reflected tables as classes
-    AssetDbEntry = Base.classes.assets
-    PricePointDbEntry = Base.classes.price_points
-
-class AssetsDbTable(db.Model):
+class AssetsDbTable(database.Model):
     """The model to the assets table.
     """
 
     __tablename__ = "assets"
-    id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(15), nullable=False)
-    processing_status = db.Column(db.Enum('active', 'pending', name='ASSET_STATUS_TYPE'), nullable=False)
-    description = db.Column(db.String(50), nullable=True)
+    id = database.Column(database.Integer, primary_key=True)
+    symbol = database.Column(database.String(15), nullable=False)
+    processing_status = database.Column(database.Enum('active',\
+        'pending', name='asset_status_type'), nullable=False)
+    description = database.Column(database.String(50), nullable=True)
 
-class PricePointsDbTable(db.Model):
+class PricePointsDbTable(database.Model):
     """The model to the price_points table.
     """
 
     __tablename__ = "price_points"
-    id = db.Column(db.Integer, primary_key=True)
-    asset_id = asset_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    open_price = db.Column(db.Float, nullable=False)
-    close_price = db.Column(db.Float, nullable=False)
-    high_price = db.Column(db.Float, nullable=False)
-    low_price = db.Column(db.Float, nullable=False)
-    adjusted_close = db.Column(db.Float, nullable=True)
-    volume = db.Column(db.Integer, nullable=True)
+    id = database.Column(database.Integer, primary_key=True)
+    asset_id = asset_id = database.Column(database.Integer,\
+        database.ForeignKey('assets.id'), nullable=False)
+    date = database.Column(database.Date, nullable=False)
+    open_price = database.Column(database.Float, nullable=False)
+    close_price = database.Column(database.Float, nullable=False)
+    high_price = database.Column(database.Float, nullable=False)
+    low_price = database.Column(database.Float, nullable=False)
+    adjusted_close = database.Column(database.Float, nullable=True)
+    volume = database.Column(database.Integer, nullable=True)
+    source = database.Column(database.Enum('yahoo_finance',\
+        'alpha_vantage', name='data_source_type'), nullable=False)
