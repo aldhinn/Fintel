@@ -230,7 +230,6 @@ def test_data_querying_for_asset(fixture_api_data):
     assert isinstance(request.get("end_date"), str)
     response, status_code = handler.process(method="POST", request=request)
     # Expected behaviours.
-    print(response)
     assert status_code == 200
     assert response.get("error") is None
     assert isinstance(response.get("description"), str)
