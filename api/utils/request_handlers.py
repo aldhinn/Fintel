@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import threading
 from typing import Any, Literal
 
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import Session
 
 from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_APPEND,\
     API_ENDPOINT_SYMBOLS
@@ -15,11 +15,11 @@ class BaseRequestHandler(ABC):
     """The base request handler type.
     """
 
-    def __init__(self, db_session:SQLAlchemy|Any) -> None:
+    def __init__(self, db_session:Session|Any) -> None:
         """Default constructor.
 
         Args:
-            db_session (SQLAlchemy | Any): The object that manages\
+            db_session (Session | Any): The object that manages\
                 the database session.
         """
 
@@ -45,7 +45,7 @@ class _SymbolsHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_SYMBOLS`
     """
 
-    def __init__(self, db_session:SQLAlchemy|Any) -> None:
+    def __init__(self, db_session:Session|Any) -> None:
         super().__init__(db_session=db_session)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
@@ -67,7 +67,7 @@ class _AppendHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_APPEND`
     """
 
-    def __init__(self, db_session:SQLAlchemy|Any) -> None:
+    def __init__(self, db_session:Session|Any) -> None:
         super().__init__(db_session=db_session)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
@@ -134,7 +134,7 @@ class _DataHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_DATA`
     """
 
-    def __init__(self, db_session:SQLAlchemy|Any) -> None:
+    def __init__(self, db_session:Session|Any) -> None:
         super().__init__(db_session=db_session)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
@@ -208,12 +208,12 @@ class RequestHandlerFactory:
     """
 
     @staticmethod
-    def create_handler(end_point:str, db_session:SQLAlchemy|Any) -> BaseRequestHandler:
+    def create_handler(end_point:str, db_session:Session|Any) -> BaseRequestHandler:
         """Creates a handler based on the route.
 
         Args:
             end_point (str): The name of the API route endpoint.
-            db_session (SQLAlchemy | Any): The object that manages\
+            db_session (Session | Any): The object that manages\
                 the database session.
 
         Returns:
