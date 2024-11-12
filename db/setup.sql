@@ -33,19 +33,19 @@ INSERT INTO currencies (symbol, description) VALUES
     ('SAR', 'Saudi Riyal');
 
 /* Type describing the processing status of the asset. */
-CREATE TYPE ASSET_STATUS_TYPE AS ENUM ('active', 'pending');
+CREATE TYPE asset_status_type AS ENUM ('active', 'pending');
 /* Type describing the category of the asset */
-CREATE TYPE ASSET_CATEGORY_TYPE AS ENUM ('stock', 'bond', 'forex', 'crypto');
+CREATE TYPE asset_category_type AS ENUM ('stock', 'bond', 'forex', 'crypto');
 /* Type describing the source of data. */
-CREATE TYPE DATA_SOURCE_TYPE AS ENUM ('yahoo_finance', 'alpha_vantage');
+CREATE TYPE data_source_type AS ENUM ('yahoo_finance', 'alpha_vantage');
 
 /* The table containing information about financial assets. */
 CREATE TABLE IF NOT EXISTS assets (
     id SERIAL PRIMARY KEY,
     symbol VARCHAR(15) UNIQUE NOT NULL,
     description VARCHAR(50),
-    processing_status ASSET_STATUS_TYPE NOT NULL DEFAULT 'pending',
-    category ASSET_CATEGORY_TYPE,
+    processing_status asset_status_type NOT NULL DEFAULT 'pending',
+    category asset_category_type,
     currency_medium VARCHAR(10) REFERENCES currencies(symbol) -- The currency medium this asset is being exchanged with.
 );
 
@@ -64,6 +64,6 @@ CREATE TABLE IF NOT EXISTS price_points (
     low_price NUMERIC(12, 4) NOT NULL,
     adjusted_close NUMERIC(12, 4),
     volume BIGINT,
-    source DATA_SOURCE_TYPE NOT NULL,
+    source data_source_type NOT NULL,
     UNIQUE (asset_id, date, source)
 );
