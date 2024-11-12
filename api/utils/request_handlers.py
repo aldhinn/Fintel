@@ -77,8 +77,7 @@ class _AppendHandler(BaseRequestHandler):
             if isinstance(request, list): # Check if this is a list object.
                 if not request:
                     return {
-                        "success": False,
-                        "message": "Provided empty asset symbols list."
+                        "error": "Provided empty asset symbols list."
                     }, 400
 
                 asset_symbols_to_be_analyzed:list[str] = []
@@ -88,8 +87,7 @@ class _AppendHandler(BaseRequestHandler):
                     if not isinstance(requested_asset_symbol, str):
                         self._db_session.rollback()
                         return {
-                            "success": False,
-                            "message": f"Invalid asset symbol value:\
+                            "error": f"Invalid asset symbol value:\
                                 {requested_asset_symbol}"
                         }, 400
 
@@ -120,14 +118,12 @@ class _AppendHandler(BaseRequestHandler):
                 except Exception as e:
                     self._db_session.rollback()
                     return {
-                        "success": False,
-                        "message": f"Registration failed with error: {e}"
+                        "error": f"Registration failed with error: {e}"
                     }, 500
 
             else:
                 return {
-                    "success": False,
-                    "message": "The requested asset symbols must be sent\
+                    "error": "The requested asset symbols must be sent\
                         via a list of strings."
                 }, 400
 
@@ -148,8 +144,7 @@ class _DataHandler(BaseRequestHandler):
             # The request should come as an object.
             if isinstance(request, list):
                 return {
-                    "success": False,
-                    "message": "Request should come as an object."
+                    "error": "Request should come as an object."
                 }, 400
 
             symbol = request.get('symbol')
@@ -159,15 +154,14 @@ class _DataHandler(BaseRequestHandler):
             # Validate the required fields
             if symbol is None or start_date is None or end_date is None:
                 return {
-                    "success": False,
-                    "message": "The fields symbol, start_date, and end_date are required."
+                    "error": "The fields symbol, start_date, and end_date are required."
                 }, 400
 
             # The data should come as strings.
-            if not isinstance(symbol, str) or not isinstance(start_date, str) or not isinstance(end_date, str):
+            if not isinstance(symbol, str) or not isinstance(start_date, str)\
+                    or not isinstance(end_date, str):
                 return {
-                    "success": False,
-                    "message": "Data provided should all be strings."
+                    "error": "Data provided should all be strings."
                 }, 400
 
             try:
@@ -175,15 +169,13 @@ class _DataHandler(BaseRequestHandler):
                 asset_entry = AssetsDbTable.query.filter_by(symbol=symbol).first()
                 if asset_entry is None:
                     return {
-                        "success": False,
-                        "message": "The symbol does not exist in the database."
+                        "error": "The symbol does not exist in the database."
                     }, 404
 
             except Exception as e:
                 self._db_session.rollback()
                 return {
-                    "success": False,
-                    "message": f"Failed to retrieve asset entries with exception: {e}"
+                    "error": f"Failed to retrieve asset entries with exception: {e}"
                 }, 500
 
             try:
@@ -208,7 +200,6 @@ class _DataHandler(BaseRequestHandler):
                 ]
 
                 return {
-                    "success": True,
                     "description": asset_entry.description,
                     "prices": price_data
                 }, 200
@@ -216,8 +207,8 @@ class _DataHandler(BaseRequestHandler):
             except Exception as e:
                 self._db_session.rollback()
                 return {
-                    "success": False,
-                    "message": f"Failed to retrieve price point entries with exception: {e}"
+                    "error": f"Failed to retrieve price point\
+                        entries with exception: {e}"
                 }, 500
         else:
             return {}, 204 # Returning an empty response.
