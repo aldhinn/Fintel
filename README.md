@@ -9,7 +9,7 @@
 
 **Fintel** is an AI-powered stock analytics dashboard, providing dynamic insights into stock trends through an interactive and cross-platform interface. Built with a Flutter frontend and a Flask backend, Fintel offers accessible, real-time market predictions and data visualization powered by LSTM neural networks.
 
-[![API](https://github.com/aldhinn/Fintel/actions/workflows/api.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/api.yaml) [![Dashboard](https://github.com/aldhinn/Fintel/actions/workflows/dashboard.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/dashboard.yaml)
+[![Build](https://github.com/aldhinn/Fintel/actions/workflows/build.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/build.yaml) [![Tests](https://github.com/aldhinn/Fintel/actions/workflows/tests.yaml/badge.svg)](https://github.com/aldhinn/Fintel/actions/workflows/tests.yaml)
 
 ![Asset Details Screen](./screenshots/asset-details.png)
 

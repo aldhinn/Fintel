@@ -1,0 +1,72 @@
+# This workflow runs all tests on Fintel.
+
+name: tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/tests.yaml"
+      - "api/requirements.txt"
+      - "api/dev-requirements.txt"
+      - "dashboard/pubspec.*"
+      - "dashboard/**.dart"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/tests.yaml"
+      - "api/requirements.txt"
+      - "api/dev-requirements.txt"
+      - "dashboard/pubspec.*"
+      - "dashboard/**.dart"
+
+jobs:
+  install-api-deps:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Pip install
+      working-directory: api
+      run: pip install -r requirements.txt
+
+    - name: Pip install dev
+      working-directory: api
+      run: pip install -r dev-requirements.txt
+
+  api-tests:
+    runs-on: self-hosted
+    needs: install-api-deps
+
+    steps:
+    - name: Check syntax
+      working-directory: api
+      run: |
+        flake8 --exclude venv --ignore=E252,E501,W292,E302,E231,E261,\
+        E302,E305,E502,E226,E402,E225,E227,E125,E128,E225,E122
+
+    - name: Run pytest
+      working-directory: api
+      run: pytest -s
+
+  install-dashboard-deps:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Get Flutter packages
+      working-directory: dashboard
+      run: flutter pub get
+
+  dashboard-tests:
+    runs-on: self-hosted
+    needs: install-dashboard-deps
+
+    steps:
+    - name: Run tests
+      working-directory: dashboard
+      run: flutter test

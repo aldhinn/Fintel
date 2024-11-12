@@ -1,0 +1,52 @@
+# This workflow builds all components of Fintel
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build.yaml"
+      - "api/requirements.txt"
+      - "dashboard/pubspec.*"
+      - "dashboard/web/**"
+      - "dashboard/lib/**.dart"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/build.yaml"
+      - "api/requirements.txt"
+      - "dashboard/pubspec.*"
+      - "dashboard/web/**"
+      - "dashboard/lib/**.dart"
+
+jobs:
+  install-api-deps:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Pip install
+      working-directory: api
+      run: pip install -r requirements.txt
+
+  install-dashboard-deps:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Get Flutter packages
+      working-directory: dashboard
+      run: flutter pub get
+
+  build-web:
+    runs-on: self-hosted
+    needs: install-dashboard-deps # This job runs after install-dashboard-deps
+
+    steps:
+    - name: Build web version
+      working-directory: dashboard
+      run: flutter build web
