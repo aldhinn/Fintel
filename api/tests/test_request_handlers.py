@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from datetime import date
 import pytest
 from utils.constants import API_ENDPOINT_DATA,\
     API_ENDPOINT_APPEND, API_ENDPOINT_SYMBOLS
@@ -205,6 +206,61 @@ def fixture_api_data():
     mock_db_session = MagicMock()
 
     return mock_db_session
+
+def test_data_querying_for_asset(fixture_api_data):
+    """Demonstrate data querying for an asset.
+    """
+    # Mock database interactions.
+    mock_db_session = fixture_api_data
+    # Create the handler instance, passing the mock db session
+    handler = RequestHandlerFactory.create_handler(\
+        API_ENDPOINT_DATA, mock_db_session)
+
+    # Simulate query return.
+    mock_db_session.query.return_value.join.return_value.\
+        filter.return_value.all.return_value = [\
+            MagicMock(date=date(2023, 1, 1), description="Some description",\
+            open_price=102.1, close_price=23.1, high_price=102.1, low_price=10.1,\
+            adjusted_close=95.7, volume=29193)\
+        ]
+
+    request = {"symbol": "AAPL", "start_date": "2024-01-01", "end_date": "2024-02-02"}
+    assert isinstance(request.get("symbol"), str)
+    assert isinstance(request.get("start_date"), str)
+    assert isinstance(request.get("end_date"), str)
+    response, status_code = handler.process(method="POST", request=request)
+    # Expected behaviours.
+    print(response)
+    assert status_code == 200
+    assert response.get("error") is None
+    assert isinstance(response.get("description"), str)
+    assert isinstance(response.get("prices"), list)
+
+def test_exception_raised_during_db_session_query(fixture_api_data):
+    """Examine the behaviours during events when exceptions are raised when querying the database.
+    """
+    # Mock database interactions.
+    mock_db_session = fixture_api_data
+    # Create the handler instance, passing the mock db session
+    handler = RequestHandlerFactory.create_handler(\
+        API_ENDPOINT_DATA, mock_db_session)
+
+    # The database session rollback call.
+    mock_db_session_rollback_call = MagicMock()
+    mock_db_session.rollback = mock_db_session_rollback_call
+
+    # Simulate throwing an exception during query.
+    mock_db_session.query.side_effect = Exception()
+
+    request = {"symbol": "AAPL", "start_date": "2024-01-01", "end_date": "2024-02-02"}
+    assert isinstance(request.get("symbol"), str)
+    assert isinstance(request.get("start_date"), str)
+    assert isinstance(request.get("end_date"), str)
+    response, status_code = handler.process(method="POST", request=request)
+    # Expected behaviours.
+    assert status_code == 500
+    assert isinstance(response.get("error"), str)
+    mock_db_session_rollback_call.assert_called_once()
 
 def test_non_string_values(fixture_api_data):
     """Examine what happens if one of the values is not a string.

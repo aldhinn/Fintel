@@ -87,8 +87,8 @@ class _AppendHandler(BaseRequestHandler):
                     if not isinstance(requested_asset_symbol, str):
                         self._db_session.rollback()
                         return {
-                            "error": f"Invalid asset symbol value:\
-                                {requested_asset_symbol}"
+                            "error": "Invalid asset symbol value:"\
+                                f"{requested_asset_symbol}"
                         }, 400
 
                     # Check if the asset symbol already exists
@@ -123,8 +123,8 @@ class _AppendHandler(BaseRequestHandler):
 
             else:
                 return {
-                    "error": "The requested asset symbols must be sent\
-                        via a list of strings."
+                    "error": "The requested asset symbols must be sent"\
+                        "via a list of strings."
                 }, 400
 
         else:
@@ -165,26 +165,16 @@ class _DataHandler(BaseRequestHandler):
                 }, 400
 
             try:
-                # Retrieve the asset entry from the database.
-                asset_entry = AssetsDbTable.query.filter_by(symbol=symbol).first()
-                if asset_entry is None:
-                    return {
-                        "error": "The symbol does not exist in the database."
-                    }, 404
-
-            except Exception as e:
-                self._db_session.rollback()
-                return {
-                    "error": f"Failed to retrieve asset entries with exception: {e}"
-                }, 500
-
-            try:
-                price_point_entries = self._db_session.\
-                    query(PricePointsDbTable).filter(\
-                    PricePointsDbTable.asset_id==asset_entry.id,\
-                    PricePointsDbTable.date >= start_date,\
-                    PricePointsDbTable.date <= end_date\
-                ).all()
+                # Collect all columns from PricePointsDbTable except `source`
+                price_point_columns = [col for col in PricePointsDbTable.__table__.columns\
+                    if col.name != "source"]
+                joint_entries = self._db_session.\
+                    query(AssetsDbTable.id, AssetsDbTable.description, *price_point_columns).\
+                    join(AssetsDbTable, PricePointsDbTable.asset_id == AssetsDbTable.id).\
+                        filter(AssetsDbTable.symbol==symbol,\
+                            PricePointsDbTable.date >= start_date,\
+                            PricePointsDbTable.date <= end_date\
+                    ).all()
 
                 # Convert prices to an array of dictionaries
                 price_data = [
@@ -196,19 +186,19 @@ class _DataHandler(BaseRequestHandler):
                         "low_price": record.low_price,
                         "adjusted_close": record.adjusted_close,
                         "volume": record.volume
-                    } for record in price_point_entries
+                    } for record in joint_entries
                 ]
 
                 return {
-                    "description": asset_entry.description,
+                    "description": joint_entries[0].description,
                     "prices": price_data
                 }, 200
 
             except Exception as e:
                 self._db_session.rollback()
                 return {
-                    "error": f"Failed to retrieve price point\
-                        entries with exception: {e}"
+                    "error": "Failed to retrieve price point"\
+                        f"entries with exception: {e}"
                 }, 500
         else:
             return {}, 204 # Returning an empty response.
