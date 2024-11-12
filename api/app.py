@@ -3,7 +3,7 @@
 from flask import Response, jsonify, request
 from utils.config import flask_app
 from utils.constants import API_ENDPOINT_DATA,\
-    API_ENDPOINT_REQUEST, API_ENDPOINT_SYMBOLS
+    API_ENDPOINT_APPEND, API_ENDPOINT_SYMBOLS
 from utils.db_models import database
 
 from utils.request_handlers import RequestHandlerFactory
@@ -22,7 +22,7 @@ def api_symbols() -> tuple[Response, int]:
 
     return jsonify(response), status_code
 
-@flask_app.route(API_ENDPOINT_REQUEST, methods=["POST"])
+@flask_app.route(API_ENDPOINT_APPEND, methods=["POST"])
 def api_request() -> tuple[Response, int]:
     """Request for a asset symbol to be analyzed.
 
@@ -32,7 +32,7 @@ def api_request() -> tuple[Response, int]:
     """
 
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_REQUEST, database.session)
+        API_ENDPOINT_APPEND, database.session)
     response, status_code = handler.process(\
         method=request.method, request=request.get_json())
 

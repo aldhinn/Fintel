@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from flask_sqlalchemy import SQLAlchemy
 
-from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_REQUEST,\
+from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_APPEND,\
     API_ENDPOINT_SYMBOLS
 from utils.data import analyze_symbols_from_list
 from utils.db_models import AssetsDbTable, PricePointsDbTable
@@ -63,10 +63,8 @@ class _SymbolsHandler(BaseRequestHandler):
         else:
             return {}, 204 # Returning an empty response.
 
-class _RequestHandler(BaseRequestHandler):
-    """Get request handler for route `API_ENDPOINT_REQUEST`
-    TODO: Will rename this later as well as the API endpoint because \
-        this is confusing.
+class _AppendHandler(BaseRequestHandler):
+    """Get request handler for route `API_ENDPOINT_APPEND`
     """
 
     def __init__(self, db_session:SQLAlchemy|Any) -> None:
@@ -243,7 +241,7 @@ class RequestHandlerFactory:
 
         handlerTypeDict = {
             API_ENDPOINT_SYMBOLS: _SymbolsHandler,
-            API_ENDPOINT_REQUEST: _RequestHandler,
+            API_ENDPOINT_APPEND: _AppendHandler,
             API_ENDPOINT_DATA: _DataHandler
         }
 
