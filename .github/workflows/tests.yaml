@@ -9,6 +9,7 @@ on:
       - ".github/workflows/tests.yaml"
       - "api/requirements.txt"
       - "api/dev-requirements.txt"
+      - "api/**.py"
       - "dashboard/pubspec.*"
       - "dashboard/**.dart"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - ".github/workflows/tests.yaml"
       - "api/requirements.txt"
       - "api/dev-requirements.txt"
+      - "api/**.py"
       - "dashboard/pubspec.*"
       - "dashboard/**.dart"
 
