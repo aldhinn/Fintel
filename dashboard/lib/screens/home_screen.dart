@@ -300,11 +300,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   });
                                 } else {
                                   _showErrorDialog(
-                                      "Failed to request asset symbols.");
+                                      "${jsonDecode(response.body)["error"]}");
                                 }
                               } catch (e) {
-                                _showErrorDialog(
-                                    "Failed to request asset symbols.");
+                                _showErrorDialog("$e");
                               }
                             },
                       child: const Text("Submit"),
