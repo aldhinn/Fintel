@@ -39,7 +39,7 @@ def api_request() -> tuple[Response, int]:
     return jsonify(response), status_code
 
 @flask_app.route(API_ENDPOINT_DATA, methods=["POST"])
-def post_data() -> Response:
+def api_data() -> Response:
     """The endpoint to obtain price data of the asset symbol.
 
     Returns:
