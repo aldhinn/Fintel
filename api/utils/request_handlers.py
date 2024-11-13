@@ -3,13 +3,13 @@
 from abc import ABC, abstractmethod
 import threading
 from typing import Any, Literal
-
 from flask import Flask
+import yfinance as yf
+from yfinance import Ticker
+from pandas import DataFrame
 from sqlalchemy.orm import Session
-
 from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_APPEND,\
     API_ENDPOINT_SYMBOLS
-from utils.data import analyze_symbols_from_list
 from utils.db_models import AssetsDbTable, PricePointsDbTable
 
 class BaseRequestHandler(ABC):
@@ -112,7 +112,7 @@ class _AppendHandler(BaseRequestHandler):
                     # Commit everything that was just done to the live database.
                     self._db_session.commit()
                     # Run on the background.
-                    threading.Thread(target=analyze_symbols_from_list,\
+                    threading.Thread(target=self._analyze_symbols_from_list,\
                         args=(asset_symbols_to_be_analyzed,)).run()
 
                     return {"success": True}, 200
@@ -131,6 +131,86 @@ class _AppendHandler(BaseRequestHandler):
 
         else:
             return {}, 204 # Returning an empty response.
+
+    def _analyze_symbols_from_list(self, asset_symbols_list:list[str]) -> None:
+        """Analyze the list of symbol names specified.
+
+        Args:
+            asset_symbols_list (list[str]): The list of asset symbols to be analyzed.
+        """
+
+        for asset_symbol in asset_symbols_list:
+            self._fetch_from_yahoo_finance(asset_symbol=asset_symbol)
+
+    def _fetch_from_yahoo_finance(self, asset_symbol:str) -> None:
+        """Fetch data from yahoo finance and store in the database.
+
+        Args:
+            asset_symbol (str): The symbol of the asset to be retrieved online.
+        """
+
+        with self._flask_app.app_context():
+            try:
+                # Retrieve the asset id from the database.
+                asset_id = self._db_session.query(AssetsDbTable.id).\
+                    filter_by(symbol=asset_symbol).first().id
+            except Exception as e:
+                print(f"Failed to retrieve asset id with message: {e}")
+                return
+
+            try:
+                # Fetch all historical data.
+                data:DataFrame|None = yf.download(asset_symbol)
+            except Exception as e:
+                print(f"Failed to download from yahoo finance with message: {e}")
+                return
+
+            # Halt from here on if retrieved nothing.
+            if data is None:
+                return
+
+            # Reset index to turn the date into a column
+            data.reset_index(inplace=True)
+            # Prepare the DataFrame
+            df_price_history = data[["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]].copy()
+            df_price_history.columns = ["date", "open_price", "high_price", "low_price", "close_price", "adjusted_close", "volume"]
+
+            try:
+                # Iterate over the data frame to be stored in the database.
+                for _, row in df_price_history.iterrows():
+                    price_record = PricePointsDbTable(
+                        asset_id=asset_id,
+                        date=row["date"],
+                        open_price=row["open_price"],
+                        close_price=row["close_price"],
+                        high_price=row["high_price"],
+                        low_price=row["low_price"],
+                        adjusted_close=row["adjusted_close"],
+                        volume=row["volume"],
+                        source="yahoo_finance",
+                    )
+                    self._db_session.add(price_record)
+                self._db_session.commit()
+            except Exception as e:
+                print(f"Error in submitting price point entries: {e}")
+                self._db_session.rollback()
+                return
+
+            try:
+                # Fetch metadata.
+                metadata:dict = Ticker(asset_symbol).info
+                # The reference to the asset entry in the database.
+                ref_asset_entry = AssetsDbTable.query.get(asset_id)
+                description = metadata.get("longName", "Description not available")
+
+                # Update asset entry.
+                ref_asset_entry.processing_status = "active"
+                ref_asset_entry.description = description
+
+                self._db_session.commit()
+            except Exception as e:
+                self._db_session.rollback()
+                print(f"Failed to update asset entry with exception: {e}")
 
 class _DataHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_DATA`
