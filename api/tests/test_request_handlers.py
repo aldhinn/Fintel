@@ -105,7 +105,7 @@ def test_track_add_calls(fixture_api_append):
     request = ["asset1", "asset2"]
     response, status_code = handler.process(method="POST", request=request)
 
-    assert status_code == 200
+    assert status_code == 204
     assert len(request) == mock_db_session_add_call.call_count
     assert response.get("error") is None
 

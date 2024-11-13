@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                                 Navigator.of(context).pop();
 
-                                if (response.statusCode == 200) {
+                                if (response.statusCode == 204) {
                                   Navigator.of(context).pop();
                                   _showConfirmationDialog("Successfully sent.");
                                   setState(() {

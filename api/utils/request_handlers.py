@@ -115,7 +115,7 @@ class _AppendHandler(BaseRequestHandler):
                     threading.Thread(target=self._analyze_symbols_from_list,\
                         args=(asset_symbols_to_be_analyzed,)).run()
 
-                    return {"success": True}, 200
+                    return {}, 204
 
                 except Exception as e:
                     self._db_session.rollback()
