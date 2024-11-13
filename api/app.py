@@ -17,7 +17,7 @@ def api_symbols() -> tuple[Response, int]:
     """
 
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_SYMBOLS, database.session)
+        API_ENDPOINT_SYMBOLS, database.session, flask_app)
     response, status_code = handler.process(method=request.method)
 
     return jsonify(response), status_code
@@ -32,7 +32,7 @@ def api_request() -> tuple[Response, int]:
     """
 
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, database.session)
+        API_ENDPOINT_APPEND, database.session, flask_app)
     response, status_code = handler.process(\
         method=request.method, request=request.get_json())
 
@@ -49,7 +49,7 @@ def api_data() -> Response:
     """
 
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, database.session)
+        API_ENDPOINT_DATA, database.session, flask_app)
     response, status_code = handler.process(\
         method=request.method, request=request.get_json())
 

@@ -17,7 +17,7 @@ def test_invalid_api_endpoint_name():
 
     # This is expected to raise a TypeError exception.
     with pytest.raises(TypeError):
-        RequestHandlerFactory.create_handler(fake_api_endpoint)
+        RequestHandlerFactory.create_handler(fake_api_endpoint, MagicMock())
 
 @pytest.fixture
 def fixture_api_symbols():
@@ -32,19 +32,21 @@ def fixture_api_symbols():
         return_value=[(value,) for value in expected_active_list])
     mock_db_session.query.return_value.\
         filter_by.return_value.all = mock_all_active_query
+    # Mock flask application.
+    mock_flask_app = MagicMock()
 
-    return expected_active_list, mock_db_session, mock_all_active_query
+    return expected_active_list, mock_db_session, mock_all_active_query, mock_flask_app
 
 def test_retrieve_symbols(fixture_api_symbols):
     """Retrieve asset symbols that are 'active'.
     """
     # Mock database interactions.
     expected_active_list, mock_db_session,\
-        mock_all_active_query = fixture_api_symbols
+        mock_all_active_query, mock_flask_app = fixture_api_symbols
 
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_SYMBOLS, mock_db_session)
+        API_ENDPOINT_SYMBOLS, mock_db_session, mock_flask_app)
     # Get method at the endpoint.
     response, status_code = handler.process(method="GET")
 
@@ -57,10 +59,10 @@ def test_non_get_methods_symbols(fixture_api_symbols):
     """Attempt to do non-get requests.
     """
     # Mock database interactions.
-    _, mock_db_session, mock_all_active_query = fixture_api_symbols
+    _, mock_db_session, mock_all_active_query, mock_flask_app = fixture_api_symbols
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_SYMBOLS, mock_db_session)
+        API_ENDPOINT_SYMBOLS, mock_db_session, mock_flask_app)
     # For other methods, there should be no response.
     for api_method in ["POST", "PUT", "DELETE"]:
         response, status_code = handler.process(method=api_method)
@@ -81,18 +83,20 @@ def fixture_api_append():
     # Database session add
     mock_db_session_add_call = MagicMock()
     mock_db_session.add = mock_db_session_add_call
+    # Mock flask application.
+    mock_flask_app = MagicMock()
 
     return mock_db_session, mock_db_session_rollback_call,\
-        mock_db_session_add_call
+        mock_db_session_add_call, mock_flask_app
 
 def test_track_add_calls(fixture_api_append):
     """Track the number of add calls to the database.
     """
     # Mock database interactions.
-    mock_db_session, _, mock_db_session_add_call = fixture_api_append
+    mock_db_session, _, mock_db_session_add_call, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
 
     # Mock a return value for this query.
     mock_db_session.query.return_value.\
@@ -109,10 +113,10 @@ def test_exceptions_raised_during_commit(fixture_api_append):
     """Expected to rollback database session if exception is raised.
     """
     # Mock database interactions.
-    mock_db_session, mock_db_session_rollback_call, _ = fixture_api_append
+    mock_db_session, mock_db_session_rollback_call, _, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
 
     # Mock raising an exception.
     mock_db_session.commit.side_effect = Exception()
@@ -129,10 +133,10 @@ def test_posting_with_list_with_non_string_element(fixture_api_append):
     """
     # Mock database interactions.
     mock_db_session, mock_db_session_rollback_call,\
-        mock_db_session_add_call = fixture_api_append
+        mock_db_session_add_call, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
 
     # Request with a list with non string element.
     request = ["some_string", {"property": "Some_non_str_obj"}]
@@ -150,10 +154,10 @@ def test_posting_with_empty_list(fixture_api_append):
     """Examining behaviours when requesting with an empty list request body.
     """
     # Mock database interactions.
-    mock_db_session, _, mock_db_session_add_call = fixture_api_append
+    mock_db_session, _, mock_db_session_add_call, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
 
     # Request with an object, not a list.
     request_obj:list = []
@@ -168,10 +172,10 @@ def test_posting_with_non_list(fixture_api_append):
     """Examining behaviours when requesting with a non-list type request body.
     """
     # Mock database interactions.
-    mock_db_session, _, mock_db_session_add_call = fixture_api_append
+    mock_db_session, _, mock_db_session_add_call, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
 
     # Request with an object, not a list.
     request_obj = {}
@@ -186,10 +190,10 @@ def test_non_post_methods_append(fixture_api_append):
     """Attempt to do non-post requests.
     """
     # Mock database interactions.
-    mock_db_session, _, mock_db_session_add_call = fixture_api_append
+    mock_db_session, _, mock_db_session_add_call, mock_flask_app = fixture_api_append
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, mock_db_session)
+        API_ENDPOINT_APPEND, mock_db_session, mock_flask_app)
     # For other methods, there should be no response.
     for api_method in ["GET", "PUT", "DELETE"]:
         result, status_code = handler.process(method=api_method, request={})
@@ -204,17 +208,19 @@ def fixture_api_data():
     """
     # Mock database session.
     mock_db_session = MagicMock()
+    # Mock flask application.
+    mock_flask_app = MagicMock()
 
-    return mock_db_session
+    return mock_db_session, mock_flask_app
 
 def test_data_querying_for_asset(fixture_api_data):
     """Demonstrate data querying for an asset.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
 
     # Simulate query return.
     mock_db_session.query.return_value.join.return_value.\
@@ -239,10 +245,10 @@ def test_exception_raised_during_db_session_query(fixture_api_data):
     """Examine the behaviours during events when exceptions are raised when querying the database.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
 
     # The database session rollback call.
     mock_db_session_rollback_call = MagicMock()
@@ -265,10 +271,10 @@ def test_non_string_values(fixture_api_data):
     """Examine what happens if one of the values is not a string.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
 
     # Symbol is not as string.
     request = {"symbol": {}, "start_date": "2024-01-01", "end_date": "2024-02-02"}
@@ -307,10 +313,10 @@ def test_posting_incomplete_keys(fixture_api_data):
     """Examine what happens if either symbol, start_date or end_date are unspecified.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
 
     # Request doesn't have end_date.
     request = {"symbol": "AAPL", "start_date": "2024-01-01"}
@@ -340,10 +346,10 @@ def test_posting_with_list(fixture_api_data):
     """Examine the behaviours requesting data using list.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
 
     request:list = []
     assert isinstance(request, list)
@@ -356,10 +362,10 @@ def test_non_post_methods_data(fixture_api_data):
     """Attempt to do non-post requests.
     """
     # Mock database interactions.
-    mock_db_session = fixture_api_data
+    mock_db_session, mock_flask_app = fixture_api_data
     # Create the handler instance, passing the mock db session
     handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session)
+        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
     # For other methods, there should be no response.
     for api_method in ["GET", "PUT", "DELETE"]:
         result, status_code = handler.process(method=api_method, request={})

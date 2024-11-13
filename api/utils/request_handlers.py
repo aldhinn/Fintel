@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import threading
 from typing import Any, Literal
 
+from flask import Flask
 from sqlalchemy.orm import Session
 
 from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_APPEND,\
@@ -15,7 +16,7 @@ class BaseRequestHandler(ABC):
     """The base request handler type.
     """
 
-    def __init__(self, db_session:Session|Any) -> None:
+    def __init__(self, db_session:Session|Any, flask_app:Flask|Any) -> None:
         """Default constructor.
 
         Args:
@@ -24,6 +25,7 @@ class BaseRequestHandler(ABC):
         """
 
         self._db_session = db_session
+        self._flask_app = flask_app
 
     @abstractmethod
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"] = "GET",\
@@ -45,8 +47,8 @@ class _SymbolsHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_SYMBOLS`
     """
 
-    def __init__(self, db_session:Session|Any) -> None:
-        super().__init__(db_session=db_session)
+    def __init__(self, db_session:Session|Any, flask_app:Flask|Any) -> None:
+        super().__init__(db_session=db_session, flask_app=flask_app)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
             request:dict|list = {}) -> tuple[dict|list, int]:
@@ -67,8 +69,8 @@ class _AppendHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_APPEND`
     """
 
-    def __init__(self, db_session:Session|Any) -> None:
-        super().__init__(db_session=db_session)
+    def __init__(self, db_session:Session|Any, flask_app:Flask|Any) -> None:
+        super().__init__(db_session=db_session, flask_app=flask_app)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
             request:dict|list) -> tuple[dict|list, int]:
@@ -134,8 +136,8 @@ class _DataHandler(BaseRequestHandler):
     """Get request handler for route `API_ENDPOINT_DATA`
     """
 
-    def __init__(self, db_session:Session|Any) -> None:
-        super().__init__(db_session=db_session)
+    def __init__(self, db_session:Session|Any, flask_app:Flask|Any) -> None:
+        super().__init__(db_session=db_session, flask_app=flask_app)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
             request:dict|list) -> tuple[dict|list, int]:
@@ -208,7 +210,7 @@ class RequestHandlerFactory:
     """
 
     @staticmethod
-    def create_handler(end_point:str, db_session:Session|Any) -> BaseRequestHandler:
+    def create_handler(end_point:str, db_session:Session|Any, flask_app:Flask|Any) -> BaseRequestHandler:
         """Creates a handler based on the route.
 
         Args:
@@ -228,7 +230,7 @@ class RequestHandlerFactory:
 
         try:
             # Attempt instantiating handler.
-            handler = handlerTypeDict[end_point](db_session)
+            handler = handlerTypeDict[end_point](db_session, flask_app)
             return handler
         except Exception:
             # Return the base class if `endpoint` is invalid.
