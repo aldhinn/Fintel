@@ -6,6 +6,7 @@ setlocal
 set "python_exe=python.exe"
 set "pytest_exe=pytest.exe"
 set "flake8_exe=flake8"
+set "gunicorn_exe=gunicorn"
 
 where %python_exe% > nul 2>&1
 if %errorlevel% neq 0 (
@@ -22,20 +23,27 @@ if %errorlevel% neq 0 (
     echo Please install flake8 in your system.
     exit /b 1
 )
+where %gunicorn_exe% > nul 2>&1
+if %errorlevel% neq 0 (
+    echo Please install gunicorn in your system.
+    exit /b 1
+)
 
 @rem The directory where this script exists.
 set "script_dir=%~dp0"
+@rem Change working directory to script_dir.
+cd %script_dir%
 
 if "%~1"=="test" (
     @rem Check syntax of scripts.
-    %flake8_exe% --exclude $script_dir/venv --ignore=E252,E501,W292,E302,^
+    %flake8_exe% --exclude ./venv --ignore=E252,E501,W292,E302,^
         E231,E261,E302,E305,E502,E226,E402,E225,E227,E125,E128,^
-        E225,E122,E131,E127,E124 %script_dir%
+        E225,E122,E131,E127,E124
     @rem Run the tests
-    %pytest_exe% -s %script_dir%
+    %pytest_exe% -s
 ) else (
     @rem Default behavior: Run the application
-    %python_exe% %script_dir%\app.py
+    %gunicorn_exe% -w 4 -b 0.0.0.0:61000 app:flask_app
 )
 
 endlocal

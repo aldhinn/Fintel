@@ -55,6 +55,8 @@ def api_data() -> Response:
 
     return jsonify(response), status_code
 
+database.init_app(flask_app)
+
+# Run only if this script is executed directly. You'd only do that when debugging.
 if __name__ == "__main__":
-    database.init_app(flask_app)
-    flask_app.run(host="0.0.0.0", port=flask_app.config["PORT"])
+    flask_app.run(host="0.0.0.0", port=flask_app.config["PORT"], debug=True)
