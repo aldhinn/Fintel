@@ -4,7 +4,7 @@
 </h1>
 
 [![License](https://img.shields.io/badge/License-AGPL%20v3-blue)](./LICENSE)
-[![Flutter](https://img.shields.io/badge/Frontend-Flutter-00B4AB)]((https://flutter.dev))
+[![Flutter](https://img.shields.io/badge/Frontend-Flutter-00B4AB)](https://flutter.dev)
 [![Python](https://img.shields.io/badge/Backend-Python-3572A5)](https://www.python.org)
 
 **Fintel** is an AI-powered stock analytics dashboard, providing dynamic insights into stock trends through an interactive and cross-platform interface. Built with a Flutter frontend and a Flask backend, Fintel offers accessible, real-time market predictions and data visualization powered by LSTM neural networks.
