@@ -1,13 +1,13 @@
 # Python related files.
-**__pycache__
-**.pytest_cache
+**__pycache__/
+**.pytest_cache/
 **.pyc
-**..pyo
-**..pyd
-**..db
-**..sqlite3
-**..log
-**venv
+**.pyo
+**.pyd
+**.db
+**.sqlite3
+**.log
+**venv/
 
 # Git ignore vscode configurations.
-**.vscode
+**.vscode/
