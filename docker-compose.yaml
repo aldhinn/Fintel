@@ -9,6 +9,8 @@ services:
       - SERVICE_PORT=61000
     ports:
       - "61000:61000"
+    volumes:
+      - fintel-service-data:/home/fintel:rw
     depends_on:
       - fintel-database
 
@@ -35,4 +37,5 @@ secrets:
     file: ./api/secrets/db_password
 
 volumes:
+  fintel-service-data:
   fintel-database-data:
