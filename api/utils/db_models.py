@@ -30,6 +30,6 @@ class PricePointsDbTable(database.Model):
     high_price = database.Column(database.Float, nullable=False)
     low_price = database.Column(database.Float, nullable=False)
     adjusted_close = database.Column(database.Float, nullable=True)
-    volume = database.Column(database.Integer, nullable=True)
+    volume = database.Column(database.BigInteger, nullable=True)
     source = database.Column(database.Enum('yahoo_finance',\
         'alpha_vantage', name='data_source_type'), nullable=False)
