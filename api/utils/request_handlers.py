@@ -20,8 +20,8 @@ class BaseRequestHandler(ABC):
         """Default constructor.
 
         Args:
-            db_session (Session | Any): The object that manages\
-                the database session.
+            db_session (Session | Any): The object that manages the database session.
+            flask_app (Flask | Any): The flask application reference.
         """
 
         self._db_session = db_session
