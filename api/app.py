@@ -5,7 +5,7 @@ from utils.config import flask_app
 from utils.constants import API_ENDPOINT_DATA,\
     API_ENDPOINT_APPEND, API_ENDPOINT_SYMBOLS
 from utils.db_models import database
-
+from utils.parallel import DataAndModelUpdater
 from utils.request_handlers import RequestHandlerFactory
 
 @flask_app.route(API_ENDPOINT_SYMBOLS, methods=["GET"])
@@ -56,6 +56,9 @@ def api_data() -> Response:
     return jsonify(response), status_code
 
 database.init_app(flask_app)
+
+# Regularly update the data and model.
+DataAndModelUpdater(db_session=database.session, flask_app=flask_app)
 
 # Run only if this script is executed directly. You'd only do that when debugging.
 if __name__ == "__main__":
