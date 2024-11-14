@@ -67,3 +67,27 @@ CREATE TABLE IF NOT EXISTS price_points (
     source data_source_type NOT NULL,
     UNIQUE (asset_id, date, source)
 );
+
+/* Table containing model data. */
+CREATE TABLE ai_models (
+    id SERIAL PRIMARY KEY,
+    model_name VARCHAR(100) NOT NULL UNIQUE,
+    model_type VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    model_data BYTEA NOT NULL,
+    last_trained TIMESTAMP
+);
+
+-- Define an ENUM type with only the allowed prediction types.
+CREATE TYPE prediction_type_enum AS ENUM ('open_price', 'high_price', 'low_price', 'close_price', 'adjusted_close', 'volume');
+
+-- Create the predictions table with the ENUM type constraint.
+CREATE TABLE predictions (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    model_id INTEGER NOT NULL REFERENCES ai_models(id) ON DELETE CASCADE,
+    prediction_type prediction_type_enum NOT NULL,
+    prediction NUMERIC NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    retrained BOOLEAN DEFAULT FALSE
+);
