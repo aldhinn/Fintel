@@ -20,8 +20,12 @@ def test_invalid_api_endpoint_name():
         RequestHandlerFactory.create_handler(fake_api_endpoint, MagicMock())
 
 @pytest.fixture
-def fixture_api_symbols():
-    """Fixture for API endpoint `API_ENDPOINT_SYMBOLS`
+def fixture_api_symbols() -> tuple[list[str], MagicMock, MagicMock, MagicMock]:
+    """Fixture for API endpoint `API_ENDPOINT_SYMBOLS`.
+
+    Returns:
+        tuple[list[str], MagicMock, MagicMock, MagicMock]: (expected_active_list,\
+            mock_db_session, mock_all_active_query, mock_flask_app)
     """
     # The expected 'active' list of asset symbols.
     expected_active_list = ["AAPL", "GOOGL"]
@@ -72,8 +76,12 @@ def test_non_get_methods_symbols(fixture_api_symbols):
         mock_all_active_query.assert_not_called()
 
 @pytest.fixture
-def fixture_api_append():
-    """Fixture for API endpoint `API_ENDPOINT_APPEND`
+def fixture_api_append() -> tuple[MagicMock, MagicMock, MagicMock, MagicMock]:
+    """Fixture for API endpoint `API_ENDPOINT_APPEND`.
+
+    Returns:
+        tuple[MagicMock, MagicMock, MagicMock, MagicMock]: (mock_db_session,\
+            mock_db_session_rollback_call, mock_db_session_add_call, mock_flask_app)
     """
     # Mock database session.
     mock_db_session = MagicMock()
@@ -248,8 +256,11 @@ def test_yf_download_none(fixture_api_append):
         mock_db_session_commit.assert_not_called()
 
 @pytest.fixture
-def fixture_api_data():
-    """Fixture for API endpoint `API_ENDPOINT_DATA`
+def fixture_api_data() -> tuple[MagicMock, MagicMock]:
+    """Fixture for API endpoint `API_ENDPOINT_DATA`.
+
+    Returns:
+        tuple[MagicMock, MagicMock]: (mock_db_session, mock_flask_app)
     """
     # Mock database session.
     mock_db_session = MagicMock()
