@@ -51,7 +51,7 @@ class _SymbolsHandler(BaseRequestHandler):
         super().__init__(db_session=db_session, flask_app=flask_app)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
-            request:dict|list = {}) -> tuple[dict|list, int]:
+            _:dict|list = {}) -> tuple[dict|list, int]:
 
         if method == "GET":
             # Query only the "symbol" column with active processing status.
