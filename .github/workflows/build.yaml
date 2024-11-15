@@ -49,4 +49,4 @@ jobs:
     steps:
     - name: Build web version
       working-directory: dashboard
-      run: flutter build web
+      run: flutter build web --release
