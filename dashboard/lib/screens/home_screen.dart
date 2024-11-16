@@ -1,10 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'dart:convert';
-import 'asset_details_screen.dart';
+import "package:flutter/material.dart";
+import "package:http/http.dart" as http;
+import "package:http/http.dart";
+import "dart:convert";
+import "asset_details_screen.dart";
 
-/// A stateful widget that displays the dashboard.
+/// The HomeScreen widget serves as the main interface for displaying a list of
+/// asset symbols retrieved from the server. It also provides functionality to:
+/// - Fetch the asset symbols from the server.
+/// - Navigate to details of a selected asset symbol.
+/// - Request new asset symbols to be added to the server.
+///
+/// This screen is stateful and updates dynamically based on server responses.
+///
+/// Parameters:
+/// - `assetSymbols` (List<String>): Initial list of asset symbols to display.
+/// - `hostname` (String): The server hostname.
+/// - `port` (String): The server port.
 class HomeScreen extends StatefulWidget {
   final List<String> assetSymbols;
   final String hostname;
@@ -20,27 +31,6 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-/// HomeScreen Widget
-///
-/// This screen displays a list of asset symbols retrieved from the Fintel server.
-/// It serves as the main interface for users to view available asset symbols and
-/// navigate to detailed views of each asset symbol.
-///
-/// The HomeScreen retrieves asset symbols from the server whenever it is
-/// displayed, ensuring that users always see the most up-to-date information.
-///
-/// Key Features:
-/// - A dynamic list of asset symbols presented in a visually appealing format.
-/// - Clicking on an asset symbol navigates to the AssetDetailsScreen,
-///   where users can view detailed information and graphs related to
-///   the selected asset symbol.
-/// - Automatically refreshes asset symbols when navigating back from the
-///   AssetDetailsScreen, ensuring the user sees any updates that may have
-///   occurred during their navigation.
-///
-/// This screen does not include a back navigation arrow to the
-/// ConnectScreen, enforcing a straightforward navigation flow
-/// within the application.
 class _HomeScreenState extends State<HomeScreen> {
   /// A list to hold the asset symbols retrieved from the server.
   List<String> _assetSymbols = <String>[];
@@ -57,11 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Populated as the user adds each asset symbol to their request.
   final List<String> _newAssetSymbolsToBeAdded = <String>[];
 
-  /// Initializes the state and fetches asset symbols from the server.
-  ///
-  /// This method is called when the widget is first created.
-  /// It triggers the fetchAssetSymbols method to load the asset symbols
-  /// immediately upon entering the HomeScreen.
   @override
   void initState() {
     super.initState();
@@ -71,21 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  /// Called when the dependencies of this State object change.
-  ///
-  /// This method is triggered after the state object is created and
-  /// whenever the dependencies of the widget change. This can occur
-  /// when the parent widget rebuilds, which can affect the inherited
-  /// widgets that this State object relies on.
-  ///
-  /// Typically, this method is overridden to fetch data that requires
-  /// the build context or to listen to inherited widget changes.
-  ///
-  /// For instance, if you have an InheritedWidget that provides data
-  /// to this widget, you can use this method to react to those changes.
-  /// In this case, there is no specific implementation required for
-  /// the HomeScreen, but it can be used for additional setup in the
-  /// future if needed.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -94,11 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Fetches asset symbols from the server using the provided hostname and port.
   ///
-  /// This method sends an HTTP GET request to the server's /symbols endpoint.
+  /// This method sends an HTTP GET request to the server"s /symbols endpoint.
   /// If successful, it updates the state with the retrieved asset symbols.
   /// If the request fails, it navigates back to the ConnectScreen.
   Future<void> fetchAssetSymbols() async {
-    final url = Uri.parse('http://${widget.hostname}:${widget.port}/symbols');
+    final url = Uri.parse("http://${widget.hostname}:${widget.port}/symbols");
 
     setState(() {
       _isLoading = true;
@@ -109,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         final dynamic decodedData = jsonDecode(response.body);
-        if (decodedData is Map && decodedData.containsKey('symbols')) {
+        if (decodedData is Map && decodedData.containsKey("symbols")) {
           setState(() {
-            _assetSymbols = List<String>.from(decodedData['symbols']);
+            _assetSymbols = List<String>.from(decodedData["symbols"]);
           });
         }
       } else {
@@ -134,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Error'),
+        title: const Text("Error"),
         content: Text(message),
         actions: <Widget>[
           TextButton(
@@ -143,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.popUntil(
                   context, (Route<dynamic> route) => route.isFirst);
             },
-            child: const Text('OK'),
+            child: const Text("OK"),
           ),
         ],
       ),
@@ -209,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text(
-                          'Request New Asset Symbols',
+                          "Request New Asset Symbols",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
@@ -219,8 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: TextField(
                           controller: _assetSymbolsRequestListController,
                           decoration: const InputDecoration(
-                            labelText: 'Enter asset symbol',
-                            hintText: 'e.g., AAPL',
+                            labelText: "Enter asset symbol",
+                            hintText: "e.g., AAPL",
                             border: OutlineInputBorder(),
                           ),
                           onSubmitted: (String value) {
@@ -275,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? null
                           : () async {
                               final Uri url = Uri.parse(
-                                  'http://${widget.hostname}:${widget.port}/append');
+                                  "http://${widget.hostname}:${widget.port}/append");
                               final String payload =
                                   jsonEncode(_newAssetSymbolsToBeAdded);
 
@@ -285,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 final Response response = await http.post(
                                   url,
                                   headers: <String, String>{
-                                    'Content-Type': 'application/json'
+                                    "Content-Type": "application/json"
                                   },
                                   body: payload,
                                 );
@@ -312,12 +282,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 )));
   }
 
-  /// Builds the user interface for the HomeScreen.
-  ///
-  /// This method constructs the layout of the screen, including
-  /// a loading indicator if asset symbols are being fetched and a ListView
-  /// to display the asset symbols. Tapping an asset symbol navigates
-  /// to the AssetDetailsScreen with the selected asset symbol.
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -336,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       .primaryColor, // Inherit primary color from theme
                 ),
                 child: Text(
-                  'Menu',
+                  "Menu",
                   style: TextStyle(
                     color: Theme.of(context)
                         .colorScheme
@@ -351,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .iconTheme
                         .color), // Inherit icon color
                 title: Text(
-                  'Switch Server',
+                  "Switch Server",
                   style: Theme.of(context)
                       .textTheme
                       .bodyLarge, // Inherit text style
