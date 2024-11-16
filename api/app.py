@@ -4,7 +4,7 @@ from flask import Response, jsonify, request
 from utils.config import flask_app
 from utils.constants import API_ENDPOINT_DATA,\
     API_ENDPOINT_APPEND, API_ENDPOINT_SYMBOLS
-from utils.db_models import database
+from utils.db_models import database, setup_database
 from utils.parallel import DataAndModelUpdater
 from utils.request_handlers import RequestHandlerFactory
 
@@ -55,11 +55,19 @@ def api_data() -> Response:
 
     return jsonify(response), status_code
 
-database.init_app(flask_app)
+def setup_app():
+    """Sets up the application.
 
-# Regularly update the data and model.
-DataAndModelUpdater(db_session=database.session, flask_app=flask_app)
+    Returns:
+        Flask: The instance to the flask application.
+    """
+
+    # Regularly update the data and model.
+    DataAndModelUpdater(db_session=database.session, flask_app=flask_app)
+
+    setup_database()
+    return flask_app
 
 # Run only if this script is executed directly. You'd only do that when debugging.
 if __name__ == "__main__":
-    flask_app.run(host="0.0.0.0", port=flask_app.config["PORT"], debug=True)
+    setup_app().run(host="0.0.0.0", port=flask_app.config["PORT"], debug=True)

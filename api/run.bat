@@ -43,7 +43,7 @@ if "%~1"=="test" (
     %pytest_exe% -s
 ) else (
     @rem Default behavior: Run the application
-    %gunicorn_exe% -w 4 -b 0.0.0.0:61000 app:flask_app
+    %gunicorn_exe% -w 4 -b 0.0.0.0:61000 'app:setup_app()'
 )
 
 endlocal

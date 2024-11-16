@@ -34,5 +34,5 @@ if [ "$1" = "test" ]; then
     pytest -s
 else
     # Default behavior: Run the application
-    gunicorn -w 4 -b 0.0.0.0:61000 app:flask_app
+    gunicorn -w 4 -b 0.0.0.0:61000 'app:setup_app()'
 fi

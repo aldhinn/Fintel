@@ -28,7 +28,6 @@ services:
       - db_password
     volumes:
       - fintel-database-data:/var/lib/postgresql/data:rw
-      - ./db/setup.sql:/docker-entrypoint-initdb.d/setup.sql:ro
 
 secrets:
   db_user:
