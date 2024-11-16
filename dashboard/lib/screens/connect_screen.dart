@@ -1,9 +1,14 @@
-import 'package:fintel/screens/home_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import "package:fintel/screens/home_screen.dart";
+import "package:flutter/material.dart";
+import "package:http/http.dart" as http;
+import "dart:convert";
 
-/// A stateful widget that handles the connection to the Fintel server.
+/// A screen where the user can input a hostname and port to connect to a Fintel server.
+///
+/// The screen displays input fields for the server"s hostname and port.
+/// If valid inputs are provided, it sends a request to the server to fetch a list of asset symbols
+/// and navigates to the [HomeScreen] on successful connection.
+/// If the connection fails, an error dialog is displayed.
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen({super.key});
 
@@ -11,34 +16,24 @@ class ConnectScreen extends StatefulWidget {
   _ConnectScreenState createState() => _ConnectScreenState();
 }
 
-/// The `_ConnectScreenState` manages the user interface for connecting
-/// to a specified server. It allows users to input the hostname and port
-/// of the Fintel server, with default values of 'localhost' and '61000'
-/// if left empty. Upon successful connection, it retrieves asset symbols
-/// from the server and navigates to the HomeScreen to display them.
-///
-/// The main responsibilities of this class include:
-/// - Collecting user input for the hostname and port.
-/// - Attempting to connect to the specified server.
-/// - Handling successful and failed connection attempts.
-/// - Navigating to the HomeScreen with the retrieved asset symbols.
 class _ConnectScreenState extends State<ConnectScreen> {
+  /// Text controller for the hostname input field.
   final _hostnameController = TextEditingController();
+
+  /// Text controller for the port input field.
   final _portController = TextEditingController();
 
-  /// Attempts to connect to the specified server using the provided
-  /// hostname and port.
+  /// Connects to the server using the provided hostname and port.
   ///
-  /// This method sends a GET request to the server's asset symbols endpoint
-  /// and retrieves asset symbols. If the connection is successful, it
-  /// navigates to the HomeScreen. If it fails, it shows an error dialog
-  /// to inform the user.
+  /// If the connection succeeds and the server responds with a valid JSON containing
+  /// a `symbols` list, the app navigates to the [HomeScreen].
+  /// Displays an error dialog if the connection fails or the response is invalid.
   Future<void> _connectToServer() async {
     final hostname = _hostnameController.text.isEmpty
-        ? 'localhost'
+        ? "localhost"
         : _hostnameController.text;
-    final port = _portController.text.isEmpty ? '61000' : _portController.text;
-    final url = Uri.parse('http://$hostname:$port/symbols');
+    final port = _portController.text.isEmpty ? "61000" : _portController.text;
+    final url = Uri.parse("http://$hostname:$port/symbols");
 
     try {
       final response = await http.get(url);
@@ -47,9 +42,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
         final decodedData = jsonDecode(response.body);
 
         if (decodedData is Map &&
-            decodedData.containsKey('symbols') &&
-            decodedData['symbols'] is List) {
-          List<String> assetSymbols = List<String>.from(decodedData['symbols']);
+            decodedData.containsKey("symbols") &&
+            decodedData["symbols"] is List) {
+          List<String> assetSymbols = List<String>.from(decodedData["symbols"]);
 
           // Navigate to HomeScreen with the list of asset symbols.
           Navigator.push(
@@ -70,32 +65,23 @@ class _ConnectScreenState extends State<ConnectScreen> {
     }
   }
 
-  /// Displays an error dialog with the specified message.
-  ///
-  /// This method is called when a connection attempt fails or when
-  /// the server response is not as expected. It provides feedback to
-  /// the user regarding the connection issue.
+  /// Displays an error dialog when the connection fails.
   void _showErrorDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Connection Error'),
-        content: const Text('Please enter a valid server address.'),
+        title: const Text("Connection Error"),
+        content: const Text("Please enter a valid server address."),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: const Text("OK"),
           ),
         ],
       ),
     );
   }
 
-  /// Builds the user interface for the ConnectScreen.
-  ///
-  /// This method returns a Scaffold widget containing the app bar,
-  /// input fields for the hostname and port, and a connect button.
-  /// It manages the layout and styling of the screen.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +106,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ),
             const SizedBox(height: 40),
             TextField(
+              key: const Key("hostnameInput"),
               controller: _hostnameController,
               decoration: const InputDecoration(
                 labelText: "Hostname (default: localhost)",
@@ -129,6 +116,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ),
             const SizedBox(height: 20),
             TextField(
+              key: const Key("portInput"),
               controller: _portController,
               decoration: const InputDecoration(
                 labelText: "Port (default: 61000)",
@@ -149,15 +137,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
     );
   }
 
-  /// Releases any resources used by the _ConnectScreenState.
-  ///
-  /// This method is called when the widget is permanently removed from the
-  /// widget tree. It is typically used to clean up any resources or
-  /// subscriptions that were initialized in the state object, ensuring
-  /// that there are no memory leaks or unnecessary resource usage.
-  ///
-  /// If you have any controllers or listeners, make sure to dispose
-  /// of them in this method to free up resources and prevent memory leaks.
   @override
   void dispose() {
     _hostnameController.dispose();

@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:fintel/screens/connect_screen.dart';
+import 'package:http/http.dart' as http;
 
+@GenerateMocks([http.Client])
 void main() {
-  group('ConnectScreen Tests', () {
-    testWidgets('Default values are set correctly',
+  group('ConnectScreen', () {
+    testWidgets('renders ConnectScreen with inputs and button',
         (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ConnectScreen()));
+      await tester.pumpWidget(
+        const MaterialApp(home: ConnectScreen()),
+      );
 
-      // Verify default hostname and port values
-      final hostnameField = find
-          .byType(TextField)
-          .at(0); // Assuming hostname is the first TextField
-      final portField =
-          find.byType(TextField).at(1); // Assuming port is the second TextField
-
-      // Verify that the values are empty by default.
-      expect(tester.widget<TextField>(hostnameField).controller!.text, '');
-      expect(tester.widget<TextField>(portField).controller!.text, '');
+      expect(find.text("Welcome to Fintel"), findsOneWidget);
+      expect(find.text("Hostname (default: localhost)"), findsOneWidget);
+      expect(find.text("Port (default: 61000)"), findsOneWidget);
+      expect(find.text("Connect"), findsOneWidget);
     });
 
-    testWidgets('Invalid input prompts error dialog',
+    testWidgets('displays error dialog on connection failure',
         (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ConnectScreen()));
+      await tester.pumpWidget(
+        const MaterialApp(home: ConnectScreen()),
+      );
 
-      // Tap the "Connect" button
+      await tester.enterText(
+          find.byKey(const Key('hostnameInput')), 'invalid-host');
+      await tester.enterText(find.byKey(const Key('portInput')), '1234');
       await tester.tap(find.text('Connect'));
-      await tester.pumpAndSettle();
 
-      // Verify that error dialog is displayed
+      await tester.pump(); // Allow UI to update.
+
+      expect(find.text('Connection Error'), findsOneWidget);
       expect(find.text('Please enter a valid server address.'), findsOneWidget);
     });
   });
