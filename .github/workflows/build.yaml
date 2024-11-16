@@ -6,7 +6,12 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/build.yaml"
+      - "api/utils/**.py"
+      - "api/.dockerignore"
+      - "api/app.py"
+      - "api/Dockerfile"
       - "api/requirements.txt"
+      - "api/run"
       - "dashboard/pubspec.*"
       - "dashboard/web/**"
       - "dashboard/lib/**.dart"
@@ -14,22 +19,28 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/build.yaml"
+      - "api/utils/**.py"
+      - "api/.dockerignore"
+      - "api/app.py"
+      - "api/Dockerfile"
       - "api/requirements.txt"
+      - "api/run"
       - "dashboard/pubspec.*"
       - "dashboard/web/**"
       - "dashboard/lib/**.dart"
 
 jobs:
-  install-api-deps:
+  build-api-service-image:
     runs-on: self-hosted
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Pip install
+    - name: Build docker image
       working-directory: api
-      run: pip install -r requirements.txt
+      run: |
+        docker build -t aldhinn/fintel:api-service .
 
   install-dashboard-deps:
     runs-on: self-hosted
