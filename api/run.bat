@@ -37,8 +37,8 @@ cd %script_dir%
 if "%~1"=="test" (
     @rem Check syntax of scripts.
     %flake8_exe% --exclude ./venv --ignore=E252,E501,W292,E302,^
-        E231,E261,E302,E305,E502,E226,E402,E225,E227,E125,E128,^
-        E225,E122,E131,E127,E124
+E231,E261,E302,E305,E502,E226,E402,E225,E227,E125,E128,^
+E225,E122,E131,E127,E124
     @rem Run the tests
     %pytest_exe% -s
 ) else (
