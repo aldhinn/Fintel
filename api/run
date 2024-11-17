@@ -33,6 +33,11 @@ if [ "$1" = "test" ]; then
     # Run the tests
     pytest -s
 else
+    # Calculate the number of CPUs
+    NUM_CPUS=$(nproc) # `nproc` gives the number of CPU cores
+    # Define the formula for the number of workers
+    WORKERS=$((NUM_CPUS * 2 + 1))
+
     # Default behavior: Run the application
-    gunicorn -w 4 -b 0.0.0.0:61000 'app:setup_app()'
+    gunicorn -w $WORKERS -b 0.0.0.0:61000 'app:setup_app()'
 fi

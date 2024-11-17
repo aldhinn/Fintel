@@ -42,8 +42,13 @@ if "%~1"=="test" (
     @rem Run the tests
     %pytest_exe% -s
 ) else (
+    @rem Get the number of CPU cores
+    for /f "tokens=2 delims==" %%A in ('wmic cpu get NumberOfLogicalProcessors /value ^| find "="') do set NUM_CPUS=%%A
+    @rem Calculate the number of workers (NUM_CPUS * 2 + 1)
+    set /a WORKERS=%NUM_CPUS% * 2 + 1
+
     @rem Default behavior: Run the application
-    %gunicorn_exe% -w 4 -b 0.0.0.0:61000 'app:setup_app()'
+    %gunicorn_exe% -w %NUM_CPUS% -b 0.0.0.0:61000 'app:setup_app()'
 )
 
 endlocal
