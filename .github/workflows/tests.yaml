@@ -4,7 +4,8 @@ name: tests
 
 on:
   push:
-    branches: [main]
+    branches:
+      - "*"
     paths:
       - ".github/workflows/tests.yaml"
       - "api/requirements.txt"
@@ -13,7 +14,8 @@ on:
       - "dashboard/pubspec.*"
       - "dashboard/**.dart"
   pull_request:
-    branches: [main]
+    branches:
+      - "*"
     paths:
       - ".github/workflows/tests.yaml"
       - "api/requirements.txt"
@@ -23,38 +25,35 @@ on:
       - "dashboard/**.dart"
 
 jobs:
-  install-api-deps:
-    runs-on: self-hosted
+  api-tests:
+    runs-on:
+      - self-hosted
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Pip install
+    - name: Install dependencies
       working-directory: api
       run: pip install -r requirements.txt
 
-    - name: Pip install dev
+    - name: Install dev dependencies
       working-directory: api
       run: pip install -r dev-requirements.txt
 
-  api-tests:
-    runs-on: self-hosted
-    needs: install-api-deps
-
-    steps:
     - name: Check syntax
       working-directory: api
       run: |
         flake8 --exclude venv --ignore=E252,E501,W292,E302,E231,E261,\
         E302,E305,E502,E226,E402,E225,E227,E125,E128,E225,E122,E131,E127,E124
 
-    - name: Run pytest
+    - name: Run tests
       working-directory: api
       run: pytest -s
 
-  install-dashboard-deps:
-    runs-on: self-hosted
+  dashboard-tests:
+    runs-on:
+      - self-hosted
 
     steps:
     - name: Checkout code
@@ -64,11 +63,6 @@ jobs:
       working-directory: dashboard
       run: flutter pub get
 
-  dashboard-tests:
-    runs-on: self-hosted
-    needs: install-dashboard-deps
-
-    steps:
     - name: Run tests
       working-directory: dashboard
       run: flutter test
