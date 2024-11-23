@@ -118,8 +118,9 @@ class PredictionsDbTable(database.Model):
     __tablename__ = "predictions"
 
     id = database.Column(database.Integer, primary_key=True)  # Unique identifier for the prediction
-    date = database.Column(database.Date, nullable=False)  # Date of the prediction
+    asset_id = database.Column(database.Integer, database.ForeignKey("assets.id", ondelete="CASCADE"), nullable=False)  # Linked asset ID
     model_id = database.Column(database.Integer, database.ForeignKey("ai_models.id", ondelete="CASCADE"), nullable=False)  # Linked AI model ID
+    date = database.Column(database.Date, nullable=False)  # Date of the prediction
     prediction_type = database.Column(prediction_type_enum, nullable=False)  # Type of the prediction
     prediction = database.Column(database.Numeric, nullable=False)  # Predicted value
     created_at = database.Column(database.DateTime, server_default=database.func.current_timestamp())  # Creation timestamp
