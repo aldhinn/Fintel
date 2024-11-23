@@ -126,6 +126,10 @@ class PredictionsDbTable(database.Model):
     created_at = database.Column(database.DateTime, server_default=database.func.current_timestamp())  # Creation timestamp
     retrained = database.Column(database.Boolean, default=False)  # Indicates if retrained
 
+    __table_args__ = (
+        database.UniqueConstraint("asset_id", "model_id", "date", "prediction_type", name="unique_price_prediction"),
+    )
+
 def setup_database():
     """Sets up the database by creating all tables and pre-populating data.
     """
