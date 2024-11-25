@@ -89,8 +89,7 @@ class _AppendHandler(BaseRequestHandler):
                     if not isinstance(requested_asset_symbol, str):
                         self._db_session.rollback()
                         return {
-                            "error": "Invalid asset symbol value:"\
-                                f"{requested_asset_symbol}"
+                            "error": f"Invalid asset symbol value: {requested_asset_symbol}"
                         }, 400
 
                     # Check if the asset symbol already exists
