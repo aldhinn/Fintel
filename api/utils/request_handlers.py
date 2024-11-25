@@ -125,8 +125,7 @@ class _AppendHandler(BaseRequestHandler):
 
             else:
                 return {
-                    "error": "The requested asset symbols must be sent"\
-                        "via a list of strings."
+                    "error": "The requested asset symbols must be sent via a list of strings."
                 }, 400
 
         else:
@@ -279,8 +278,7 @@ class _DataHandler(BaseRequestHandler):
             except Exception as e:
                 self._db_session.rollback()
                 return {
-                    "error": "Failed to retrieve price point"\
-                        f"entries with exception: {e}"
+                    "error": f"Failed to retrieve price point entries with exception: {e}"
                 }, 500
         else:
             return {}, 204 # Returning an empty response.
