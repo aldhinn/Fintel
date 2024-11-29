@@ -198,7 +198,7 @@ class _AppendHandler(BaseRequestHandler):
                 # Fetch metadata.
                 metadata:dict = Ticker(asset_symbol).info
                 # The reference to the asset entry in the database.
-                ref_asset_entry = AssetsDbTable.query.get(asset_id)
+                ref_asset_entry = self._db_session.query(AssetsDbTable).get(asset_id)
                 description = metadata.get("longName", "Description not available")
 
                 # Update asset entry.
