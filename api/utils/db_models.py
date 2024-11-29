@@ -108,8 +108,9 @@ class PredictionsDbTable(database.Model):
 
     Attributes:
         id (int): Primary key, unique identifier for the prediction.
-        date (date): Date of the prediction.
+        asset_id (int): Foreign key linking to an asset.
         model_id (int): Foreign key linking to an AI model.
+        date (date): Date of the prediction.
         prediction_type (str): Type of the prediction ("open_price", "high_price", etc.).
         prediction (Decimal): Predicted value.
         created_at (datetime): Timestamp when the prediction was created.
