@@ -87,7 +87,7 @@ class AIModelsDbTable(database.Model):
 
     Attributes:
         id (int): Primary key, unique identifier for the AI model.
-        model_name (str): Unique name for the model.
+        asset_id (int): Foreign key linking to an asset.
         model_type (str): Type of the model (e.g., "LSTM").
         created_at (datetime): Timestamp when the model was created.
         model_data (bytes): Serialized model data.
@@ -96,7 +96,7 @@ class AIModelsDbTable(database.Model):
     __tablename__ = "ai_models"
 
     id = database.Column(database.Integer, primary_key=True)  # Unique identifier for the AI model
-    model_name = database.Column(database.String(100), unique=True, nullable=False)  # Name of the model
+    asset_id = database.Column(database.Integer, database.ForeignKey("assets.id", ondelete="CASCADE"), nullable=False)  # Linked asset ID
     model_type = database.Column(database.String(100), nullable=False)  # Type of the model
     created_at = database.Column(database.DateTime, server_default=database.func.current_timestamp())  # Creation timestamp
     model_data = database.Column(BYTEA, nullable=False)  # Serialized model data
