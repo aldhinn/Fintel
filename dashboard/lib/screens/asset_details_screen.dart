@@ -84,14 +84,10 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
     final endDate = DateTime.now();
     final startDate = DateTime.now().subtract(Duration(days: 30 * _monthsBack));
 
-    final response = await http.post(
-      Uri.parse('http://${widget.hostname}:${widget.port}/data'),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "symbol": widget.assetSymbol,
-        "start_date": startDate.toIso8601String().substring(0, 10),
-        "end_date": endDate.toIso8601String().substring(0, 10)
-      }),
+    final response = await http.get(
+      Uri.parse("http://${widget.hostname}:${widget.port}/data?symbol=${widget.assetSymbol}"
+      "&start_date=${startDate.toIso8601String().substring(0, 10)}"
+      "&end_date=${endDate.toIso8601String().substring(0, 10)}")
     );
 
     if (response.statusCode == 200) {
@@ -105,7 +101,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
             .entries
             .map((entry) => FlSpot(
                   entry.key.toDouble(),
-                  entry.value['open_price'].toDouble(),
+                  double.parse(entry.value['open_price']),
                 ))
             .toList();
         _closePriceData = pricePoints
@@ -113,7 +109,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
             .entries
             .map((entry) => FlSpot(
                   entry.key.toDouble(),
-                  entry.value['close_price'].toDouble(),
+                  double.parse(entry.value['close_price']),
                 ))
             .toList();
         _adjustedClosePriceData = pricePoints
@@ -121,7 +117,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
             .entries
             .map((entry) => FlSpot(
                   entry.key.toDouble(),
-                  entry.value['adjusted_close'].toDouble(),
+                  double.parse(entry.value['adjusted_close']),
                 ))
             .toList();
         _highPriceData = pricePoints
@@ -129,7 +125,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
             .entries
             .map((entry) => FlSpot(
                   entry.key.toDouble(),
-                  entry.value['high_price'].toDouble(),
+                  double.parse(entry.value['high_price']),
                 ))
             .toList();
         _lowPriceData = pricePoints
@@ -137,7 +133,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
             .entries
             .map((entry) => FlSpot(
                   entry.key.toDouble(),
-                  entry.value['low_price'].toDouble(),
+                  double.parse(entry.value['low_price']),
                 ))
             .toList();
 

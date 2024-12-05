@@ -290,7 +290,7 @@ def test_data_querying_for_asset(fixture_api_data):
     assert isinstance(request.get("symbol"), str)
     assert isinstance(request.get("start_date"), str)
     assert isinstance(request.get("end_date"), str)
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
     # Expected behaviours.
     assert status_code == 200
     assert response.get("error") is None
@@ -317,53 +317,11 @@ def test_exception_raised_during_db_session_query(fixture_api_data):
     assert isinstance(request.get("symbol"), str)
     assert isinstance(request.get("start_date"), str)
     assert isinstance(request.get("end_date"), str)
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
     # Expected behaviours.
     assert status_code == 500
     assert isinstance(response.get("error"), str)
     mock_db_session_rollback_call.assert_called_once()
-
-def test_non_string_values(fixture_api_data):
-    """Examine what happens if one of the values is not a string.
-    """
-    # Mock database interactions.
-    mock_db_session, mock_flask_app = fixture_api_data
-    # Create the handler instance, passing the mock db session and mock flask_application
-    handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
-
-    # Symbol is not as string.
-    request = {"symbol": {}, "start_date": "2024-01-01", "end_date": "2024-02-02"}
-    assert not request.get("symbol") is None
-    assert not isinstance(request.get("symbol"), str)
-    assert isinstance(request.get("start_date"), str)
-    assert isinstance(request.get("end_date"), str)
-    response, status_code = handler.process(method="POST", request=request)
-    # Expected behaviours.
-    assert status_code == 400
-    assert isinstance(response.get("error"), str)
-
-    # start_date is not as string.
-    request = {"symbol": "AAPL", "start_date": {}, "end_date": "2024-02-02"}
-    assert not request.get("start_date") is None
-    assert not isinstance(request.get("start_date"), str)
-    assert isinstance(request.get("symbol"), str)
-    assert isinstance(request.get("end_date"), str)
-    response, status_code = handler.process(method="POST", request=request)
-    # Expected behaviours.
-    assert status_code == 400
-    assert isinstance(response.get("error"), str)
-
-    # end_date is not as string.
-    request = {"symbol": "AAPL", "start_date": "2024-02-02", "end_date": {}}
-    assert not request.get("end_date") is None
-    assert not isinstance(request.get("end_date"), str)
-    assert isinstance(request.get("symbol"), str)
-    assert isinstance(request.get("start_date"), str)
-    response, status_code = handler.process(method="POST", request=request)
-    # Expected behaviours.
-    assert status_code == 400
-    assert isinstance(response.get("error"), str)
 
 def test_posting_incomplete_keys(fixture_api_data):
     """Examine what happens if either symbol, start_date or end_date are unspecified.
@@ -377,7 +335,7 @@ def test_posting_incomplete_keys(fixture_api_data):
     # Request doesn't have end_date.
     request = {"symbol": "AAPL", "start_date": "2024-01-01"}
     assert request.get("end_date") is None
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
     # Expected behaviours.
     assert status_code == 400
     assert isinstance(response.get("error"), str)
@@ -385,7 +343,7 @@ def test_posting_incomplete_keys(fixture_api_data):
     # Request doesn't have start_date.
     request = {"symbol": "AAPL", "end_date": "2024-01-01"}
     assert request.get("start_date") is None
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
     # Expected behaviours.
     assert status_code == 400
     assert isinstance(response.get("error"), str)
@@ -393,7 +351,7 @@ def test_posting_incomplete_keys(fixture_api_data):
     # Request doesn't have symbol.
     request = {"start_date": "2024-01-01", "end_date": "2024-01-05"}
     assert request.get("symbol") is None
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
     # Expected behaviours.
     assert status_code == 400
     assert isinstance(response.get("error"), str)
@@ -409,7 +367,7 @@ def test_posting_with_list(fixture_api_data):
 
     request:list = []
     assert isinstance(request, list)
-    response, status_code = handler.process(method="POST", request=request)
+    response, status_code = handler.process(method="GET", request=request)
 
     assert status_code == 400
     assert isinstance(response.get("error"), str)
@@ -423,7 +381,7 @@ def test_non_post_methods_data(fixture_api_data):
     handler = RequestHandlerFactory.create_handler(\
         API_ENDPOINT_DATA, mock_db_session, mock_flask_app)
     # For other methods, there should be no response.
-    for api_method in ["GET", "PUT", "DELETE"]:
+    for api_method in ["POST", "PUT", "DELETE"]:
         result, status_code = handler.process(method=api_method, request={})
 
         assert status_code == 204

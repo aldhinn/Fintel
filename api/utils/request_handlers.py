@@ -220,11 +220,11 @@ class _DataHandler(BaseRequestHandler):
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
             request:dict|list) -> tuple[dict|list, int]:
 
-        if method == "POST":
-            # The request should come as an object.
+        if method == "GET":
+            # The request should be an object.
             if isinstance(request, list):
                 return {
-                    "error": "Request should come as an object."
+                    "error": "Request should be an object."
                 }, 400
 
             symbol = request.get('symbol')
@@ -235,13 +235,6 @@ class _DataHandler(BaseRequestHandler):
             if symbol is None or start_date is None or end_date is None:
                 return {
                     "error": "The fields symbol, start_date, and end_date are required."
-                }, 400
-
-            # The data should come as strings.
-            if not isinstance(symbol, str) or not isinstance(start_date, str)\
-                    or not isinstance(end_date, str):
-                return {
-                    "error": "Data provided should all be strings."
                 }, 400
 
             try:

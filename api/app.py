@@ -38,7 +38,7 @@ def api_request() -> tuple[Response, int]:
 
     return jsonify(response), status_code
 
-@flask_app.route(API_ENDPOINT_DATA, methods=["POST"])
+@flask_app.route(API_ENDPOINT_DATA, methods=["GET"])
 def api_data() -> Response:
     """The endpoint to obtain price data of the asset symbol.
 
@@ -51,7 +51,7 @@ def api_data() -> Response:
     handler = RequestHandlerFactory.create_handler(\
         API_ENDPOINT_DATA, database.session, flask_app)
     response, status_code = handler.process(\
-        method=request.method, request=request.get_json())
+        method=request.method, request=request.args)
 
     return jsonify(response), status_code
 

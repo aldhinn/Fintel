@@ -45,57 +45,13 @@ Content-Type: application/json
 ]
 
 ### Request for asset symbol price data.
-POST http://localhost:61000/data
-Content-Type: application/json
-
-{
-    "symbol": "GOOGL",
-    "start_date": "2024-10-20",
-    "end_date": "2024-11-01"
-}
+GET http://localhost:61000/data?symbol=GOOGL&start_date=2024-10-20&end_date=2024-11-01
 
 ### Request for asset symbol price data.
-POST http://localhost:61000/data
-Content-Type: application/json
-
-{
-    "symbol": "AAPL",
-    "start_date": "2024-10-20",
-    "end_date": "2024-11-01"
-}
-
-### Request should come as an object.
-POST http://localhost:61000/data
-Content-Type: application/json
-
-[
-
-]
+GET http://localhost:61000/data?symbol=AAPL&start_date=2024-10-20&end_date=2024-11-01
 
 ### Request should include symbol, start_date and end_date
-POST http://localhost:61000/data
-Content-Type: application/json
-
-{
-    "symbol": "AAPL",
-    "end_date": "2024-11-04"
-}
+GET http://localhost:61000/data?symbol=AAPL&end_date=2024-11-04
 
 ### Request should include symbol, start_date and end_date
-POST http://localhost:61000/data
-Content-Type: application/json
-
-{
-    "symbol": "GOOGL",
-    "start_date": "2024-11-01"
-}
-
-### Request data should be strings.
-POST http://localhost:61000/data
-Content-Type: application/json
-
-{
-    "symbol": "GOOGL",
-    "start_date": ["2024-11-01"],
-    "end_date": true
-}
+GET http://localhost:61000/data?symbol=GOOGL&start_date=2024-11-01
