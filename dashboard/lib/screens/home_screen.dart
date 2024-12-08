@@ -245,13 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? null
                           : () async {
                               final Uri url = Uri.parse(
-                                  "http://${widget.hostname}:${widget.port}/append");
+                                  "http://${widget.hostname}:${widget.port}/symbols");
                               final String payload =
                                   jsonEncode(_newAssetSymbolsToBeAdded);
 
                               try {
                                 _showLoadingDialog(
-                                    "Requesting for the server to append existing data");
+                                    "Requesting for the server to append the symbol");
                                 final Response response = await http.post(
                                   url,
                                   headers: <String, String>{

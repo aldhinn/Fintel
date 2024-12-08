@@ -8,8 +8,7 @@ import yfinance as yf
 from yfinance import Ticker
 from pandas import DataFrame
 from sqlalchemy.orm import Session
-from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_APPEND,\
-    API_ENDPOINT_SYMBOLS
+from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_SYMBOLS
 from utils.db_models import AssetsDbTable, PricePointsDbTable
 
 class BaseRequestHandler(ABC):
@@ -51,7 +50,7 @@ class _SymbolsHandler(BaseRequestHandler):
         super().__init__(db_session=db_session, flask_app=flask_app)
 
     def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
-            _:dict|list = {}) -> tuple[dict|list, int]:
+            request:dict|list = {}) -> tuple[dict|list, int]:
 
         if method == "GET":
             # Query only the "symbol" column with active processing status.
@@ -62,20 +61,7 @@ class _SymbolsHandler(BaseRequestHandler):
 
             return {"symbols": asset_symbols_list}, 200
 
-        else:
-            return {}, 204 # Returning an empty response.
-
-class _AppendHandler(BaseRequestHandler):
-    """Get request handler for route `API_ENDPOINT_APPEND`
-    """
-
-    def __init__(self, db_session:Session|Any, flask_app:Flask|Any) -> None:
-        super().__init__(db_session=db_session, flask_app=flask_app)
-
-    def process(self, method:Literal["GET", "POST", "PUT", "DELETE"],\
-            request:dict|list) -> tuple[dict|list, int]:
-
-        if method == "POST":
+        elif method == "POST":
             if isinstance(request, list): # Check if this is a list object.
                 if not request:
                     return {
@@ -294,7 +280,6 @@ class RequestHandlerFactory:
 
         handlerTypeDict = {
             API_ENDPOINT_SYMBOLS: _SymbolsHandler,
-            API_ENDPOINT_APPEND: _AppendHandler,
             API_ENDPOINT_DATA: _DataHandler
         }
 

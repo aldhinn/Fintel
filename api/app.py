@@ -2,13 +2,12 @@
 
 from flask import Response, jsonify, request
 from utils.config import flask_app
-from utils.constants import API_ENDPOINT_DATA,\
-    API_ENDPOINT_APPEND, API_ENDPOINT_SYMBOLS
+from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_SYMBOLS
 from utils.db_models import database, setup_database
 from utils.parallel import DataAndModelUpdater
 from utils.request_handlers import RequestHandlerFactory
 
-@flask_app.route(API_ENDPOINT_SYMBOLS, methods=["GET"])
+@flask_app.route(API_ENDPOINT_SYMBOLS, methods=["GET", "POST"])
 def api_symbols() -> tuple[Response, int]:
     """Get the list of financial asset symbols to be analyzed.
 
@@ -18,25 +17,12 @@ def api_symbols() -> tuple[Response, int]:
 
     handler = RequestHandlerFactory.create_handler(\
         API_ENDPOINT_SYMBOLS, database.session, flask_app)
-    response, status_code = handler.process(method=request.method)
-
-    return jsonify(response), status_code
-
-@flask_app.route(API_ENDPOINT_APPEND, methods=["POST"])
-def api_request() -> tuple[Response, int]:
-    """Request for a asset symbol to be analyzed.
-
-    Returns:
-        Response: The response json containing whether the request was successful and\
-            the accompanying error message when it's not successful.
-    """
-
-    handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_APPEND, database.session, flask_app)
-    response, status_code = handler.process(\
-        method=request.method, request=request.get_json())
-
-    return jsonify(response), status_code
+    if request.method == "GET":
+        response, status_code = handler.process(method=request.method, request=request.args)
+        return jsonify(response), status_code
+    else:
+        response, status_code = handler.process(method=request.method, request=request.get_json())
+        return jsonify(response), status_code
 
 @flask_app.route(API_ENDPOINT_DATA, methods=["GET"])
 def api_data() -> Response:
@@ -48,10 +34,8 @@ def api_data() -> Response:
             the array of price points.
     """
 
-    handler = RequestHandlerFactory.create_handler(\
-        API_ENDPOINT_DATA, database.session, flask_app)
-    response, status_code = handler.process(\
-        method=request.method, request=request.args)
+    handler = RequestHandlerFactory.create_handler(API_ENDPOINT_DATA, database.session, flask_app)
+    response, status_code = handler.process(method=request.method, request=request.args)
 
     return jsonify(response), status_code
 

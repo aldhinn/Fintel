@@ -4,7 +4,7 @@
 GET http://localhost:61000/symbols
 
 ### Request a single asset symbol.
-POST http://localhost:61000/append
+POST http://localhost:61000/symbols
 Content-Type: application/json
 
 [
@@ -12,7 +12,7 @@ Content-Type: application/json
 ]
 
 ### Request for multiple asset symbols.
-POST http://localhost:61000/append
+POST http://localhost:61000/symbols
 Content-Type: application/json
 
 [
@@ -21,14 +21,14 @@ Content-Type: application/json
 ]
 
 ### Empty list.
-POST http://localhost:61000/append
+POST http://localhost:61000/symbols
 Content-Type: application/json
 
 [
 ]
 
 ### Request should come as an array.
-POST http://localhost:61000/append
+POST http://localhost:61000/symbols
 Content-Type: application/json
 
 {
@@ -36,7 +36,7 @@ Content-Type: application/json
 }
 
 ### Requesting an object to be added.
-POST http://localhost:61000/append
+POST http://localhost:61000/symbols
 Content-Type: application/json
 
 [
