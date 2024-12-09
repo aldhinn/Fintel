@@ -6,8 +6,9 @@ from pandas import DataFrame, Timestamp
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.optimizers import Adam
-from utils.config import flask_app
-from utils.db_models import database, PricePointsDbTable, PredictionsDbTable, AIModelsDbTable
+from sqlalchemy.orm import Session
+from typing import Any
+from utils.db_models import PricePointsDbTable, PredictionsDbTable, AIModelsDbTable
 
 def _prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarray, ndarray]:
     """
@@ -37,67 +38,66 @@ def _prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarra
 
     return np.array(X), np.array(y)
 
-def train_lstm_model(asset_id: int) -> None:
+def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
     """
     Trains an LSTM model for each asset using price point data.
     """
-    with flask_app.app_context():
-        # Retrieve price points for the asset
-        price_points = database.session.query(PricePointsDbTable).filter_by(asset_id=asset_id).order_by(PricePointsDbTable.date.asc()).all()
-        price_points = [
-            {
-                "date": p.date,
-                "open_price": p.open_price,
-                "high_price": p.high_price,
-                "low_price": p.low_price,
-                "close_price": p.close_price,
-                "adjusted_close": p.adjusted_close,
-                "volume": p.volume
-            } for p in price_points
-        ]
+    # Retrieve price points for the asset
+    price_points = db_session.query(PricePointsDbTable).filter_by(asset_id=asset_id).order_by(PricePointsDbTable.date.asc()).all()
+    price_points = [
+        {
+            "date": p.date,
+            "open_price": p.open_price,
+            "high_price": p.high_price,
+            "low_price": p.low_price,
+            "close_price": p.close_price,
+            "adjusted_close": p.adjusted_close,
+            "volume": p.volume
+        } for p in price_points
+    ]
 
-        # Retrieve predictions and calculate errors
-        predictions = database.session.query(PredictionsDbTable).filter_by(asset_id=asset_id).all()
-        prediction_errors = {
-            pred.date: abs(pred.prediction - pred.close_price) for pred in predictions
-        } if predictions else {}
+    # Retrieve predictions and calculate errors
+    predictions = db_session.query(PredictionsDbTable).filter_by(asset_id=asset_id).all()
+    prediction_errors = {
+        pred.date: abs(pred.prediction - pred.close_price) for pred in predictions
+    } if predictions else {}
 
-        # Prepare training data
-        X, y = _prepare_training_data(price_points, prediction_errors)
+    # Prepare training data
+    X, y = _prepare_training_data(price_points, prediction_errors)
 
-        if X.shape[0] == 0:
-            print(f"Skipping asset {asset_id} due to insufficient data.")
-            return
+    if X.shape[0] == 0:
+        print(f"Skipping asset {asset_id} due to insufficient data.")
+        return
 
-        # Build the LSTM model
-        model = Sequential([
-            LSTM(50, return_sequences=True, input_shape=(X.shape[1], X.shape[2])),
-            LSTM(50),
-            Dense(1)
-        ])
+    # Build the LSTM model
+    model = Sequential([
+        LSTM(50, return_sequences=True, input_shape=(X.shape[1], X.shape[2])),
+        LSTM(50),
+        Dense(1)
+    ])
 
-        model.compile(optimizer=Adam(learning_rate=0.001), loss="mean_squared_error")
+    model.compile(optimizer=Adam(learning_rate=0.001), loss="mean_squared_error")
 
-        # Train the model
-        model.fit(X, y, epochs=20, batch_size=32, verbose=2)
+    # Train the model
+    model.fit(X, y, epochs=20, batch_size=32, verbose=2)
 
-        # Save the model
-        model_data = model.to_json()
-        last_trained = Timestamp.now()
+    # Save the model
+    model_data = model.to_json()
+    last_trained = Timestamp.now()
 
-        # Check if the model already exists
-        existing_model = database.session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
+    # Check if the model already exists
+    existing_model = db_session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
 
-        if existing_model:
-            existing_model.model_data = model_data
-            existing_model.last_trained = last_trained
-        else:
-            new_model = AIModelsDbTable(
-                asset_id=asset_id,
-                model_type="LSTM",
-                model_data=model_data,
-                last_trained=last_trained
-            )
-            database.session.add(new_model)
+    if existing_model:
+        existing_model.model_data = model_data
+        existing_model.last_trained = last_trained
+    else:
+        new_model = AIModelsDbTable(
+            asset_id=asset_id,
+            model_type="LSTM",
+            model_data=model_data,
+            last_trained=last_trained
+        )
+        db_session.add(new_model)
 
-        database.session.commit()
+    db_session.commit()
