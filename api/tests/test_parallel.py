@@ -4,7 +4,6 @@ from datetime import date, timedelta
 import time
 from unittest.mock import MagicMock, patch
 from pandas import DataFrame
-import pytest
 from utils.parallel import _BaseParallelTask, DataAndModelUpdater
 from sqlalchemy.exc import IntegrityError
 
@@ -25,25 +24,11 @@ def test_parallel_task_run_method_called():
         # Verify that _run was called by the thread
         mock_run.assert_called_once()
 
-@pytest.fixture
-def fixture_price_point_updater() -> tuple[MagicMock, MagicMock]:
-    """The fixture object for testing `PricePointUpdater`
-
-    Returns:
-        tuple[MagicMock, MagicMock]: (mock_db_session, mock_flask_app)
-    """
-
-    # Mock the database session.
-    mock_db_session = MagicMock()
-    # Mock the flask application.
-    mock_flask_app = MagicMock()
-    mock_flask_app.app_context = MagicMock()
-
-    return mock_db_session, mock_flask_app
-
+@patch("utils.config.flask_app")
+@patch("utils.db_models.database")
 @patch("time.sleep", return_value=None)  # Mock time.sleep to avoid delays
 @patch("yfinance.download")  # Mock yfinance download function
-def test_run_single_iteration(mock_yf_download, _, fixture_price_point_updater):
+def test_run_single_iteration(mock_yf_download, _, mock_database, mock_flask_app):
     """Test a single iteration of the DataAndModelUpdater task."""
 
     # Set up the mock data returned by yfinance download
@@ -57,15 +42,16 @@ def test_run_single_iteration(mock_yf_download, _, fixture_price_point_updater):
         "Volume": [1000]
     })
 
-    # Get the mocks from the fixture
-    mock_db_session, mock_flask_app = fixture_price_point_updater
+    # Mock database session.
+    mock_db_session = MagicMock()
+    mock_database.return_value.session = mock_db_session
 
     # Set up mock query result
     mock_assets = [(1, "AAPL")]
     mock_db_session.query.return_value.filter_by.return_value.all.return_value = mock_assets
 
     # Instantiate DataAndModelUpdater with a single iteration
-    _ = DataAndModelUpdater(db_session=mock_db_session, flask_app=mock_flask_app, iterations=1)
+    DataAndModelUpdater(db_session=mock_db_session, flask_app=mock_flask_app, iterations=1)
 
     # Give the thread time to run
     time.sleep(1)
@@ -78,15 +64,18 @@ def test_run_single_iteration(mock_yf_download, _, fixture_price_point_updater):
     mock_db_session.commit.assert_called_once()  # Ensure commit was called to save price points
     mock_db_session.rollback.assert_not_called() # Ensure no rollbacks have been called.
 
+@patch("utils.config.flask_app")
+@patch("utils.db_models.database")
 @patch("time.sleep", return_value=None)  # Mock time.sleep
 @patch("yfinance.download", return_value=DataFrame())  # Mock download to return an empty DataFrame
-def test_run_no_data(mock_yf_download, _, fixture_price_point_updater):
+def test_run_no_data(mock_yf_download, _, mock_database, mock_flask_app):
     """Test the case where yfinance download returns no data, in the case of\
         trading floor closures.
     """
 
-    # Get the mocks from the fixture
-    mock_db_session, mock_flask_app = fixture_price_point_updater
+    # Mock database session.
+    mock_db_session = MagicMock()
+    mock_database.return_value.session = mock_db_session
 
     # Set up mock query result
     mock_assets = [(1, "AAPL")]
@@ -104,15 +93,19 @@ def test_run_no_data(mock_yf_download, _, fixture_price_point_updater):
     mock_db_session.add.assert_not_called()  # No data should mean no calls to add any price points
     mock_db_session.commit.assert_not_called()  # No data should mean no commit
 
+@patch("utils.config.flask_app")
+@patch("utils.db_models.database")
 @patch("time.sleep", return_value=None)  # Mock time.sleep
 @patch("yfinance.download", return_value=DataFrame())  # Mock download to return an empty DataFrame
-def test_data_and_model_updater_unique_violation_handling(mock_yf_download, _, fixture_price_point_updater):
+def test_data_and_model_updater_unique_violation_handling(mock_yf_download, _, mock_database, mock_flask_app):
     """Tests that `DataAndModelUpdater` correctly handles a unique constraint violation\
         by calling `rollback()` when an `IntegrityError` occurs.
     """
 
-    # Get the mocks from the fixture
-    mock_db_session, mock_flask_app = fixture_price_point_updater
+    # Mock database session.
+    mock_db_session = MagicMock()
+    mock_database.return_value.session = mock_db_session
+
     # Mock the database query for active assets.
     mock_db_session.query.return_value.filter_by.return_value.all.return_value = [
         (2, "GOOGL")
