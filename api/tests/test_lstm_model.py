@@ -1,4 +1,4 @@
-from utils.lstm_model import prepare_training_data
+from utils.lstm_model import _prepare_training_data
 
 def test_prepare_training_data():
     price_points = [
@@ -14,7 +14,7 @@ def test_prepare_training_data():
     ]
     predictions = {"2024-01-01": 2.5}
 
-    X, _ = prepare_training_data(price_points, predictions)
+    X, _ = _prepare_training_data(price_points, predictions)
     assert X.shape[0] > 0, "No training sequences generated."
     assert X.shape[1] == 10, "Sequence length is incorrect."
     assert X.shape[2] == 6, "Feature count is incorrect."

@@ -9,7 +9,7 @@ from tensorflow.keras.optimizers import Adam
 from utils.config import flask_app
 from utils.db_models import database, PricePointsDbTable, PredictionsDbTable, AIModelsDbTable
 
-def prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarray, ndarray]:
+def _prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarray, ndarray]:
     """
     Prepares the training data for LSTM using price points and prediction errors.
 
@@ -63,7 +63,7 @@ def train_lstm_model(asset_id: int) -> None:
         } if predictions else {}
 
         # Prepare training data
-        X, y = prepare_training_data(price_points, prediction_errors)
+        X, y = _prepare_training_data(price_points, prediction_errors)
 
         if X.shape[0] == 0:
             print(f"Skipping asset {asset_id} due to insufficient data.")
