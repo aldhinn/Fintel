@@ -12,6 +12,7 @@ import yfinance as yf
 from sqlalchemy.exc import IntegrityError
 
 from utils.db_models import AssetsDbTable, PricePointsDbTable
+from utils.lstm_model import train_lstm_model
 
 class _BaseParallelTask(ABC):
     """The base type for a parallel task container.
@@ -61,6 +62,7 @@ class DataAndModelUpdater(_BaseParallelTask):
                     yesterday_date = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
 
                     self._fetch_from_yfinance(asset_id, asset_symbol, yesterday_date, today)
+                    train_lstm_model(asset_id, self._db_session)
 
             print("Successfully updated price points. Updating again in the next 8 hours.")
             # Sleep the thread for the next 8 hours, which is:

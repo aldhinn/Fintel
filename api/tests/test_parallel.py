@@ -59,7 +59,7 @@ def test_run_single_iteration(mock_yf_download, _, mock_database, mock_flask_app
     # Assertions
     mock_yf_download.assert_called_once_with("AAPL", (date.today() - timedelta(days=1)).\
         strftime("%Y-%m-%d"), date.today().strftime("%Y-%m-%d"))
-    mock_db_session.query.assert_called_once()  # Ensure the query was made to fetch active assets
+    mock_db_session.query.assert_called()  # Ensure the query was made to fetch active assets
     mock_db_session.add.assert_called_once()  # Ensure at least one add call was made for a price point
     mock_db_session.commit.assert_called_once()  # Ensure commit was called to save price points
     mock_db_session.rollback.assert_not_called() # Ensure no rollbacks have been called.

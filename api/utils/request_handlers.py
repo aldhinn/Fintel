@@ -10,6 +10,7 @@ from pandas import DataFrame
 from sqlalchemy.orm import Session
 from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_SYMBOLS
 from utils.db_models import AssetsDbTable, PricePointsDbTable
+from utils.lstm_model import train_lstm_model
 
 class BaseRequestHandler(ABC):
     """The base request handler type.
@@ -126,6 +127,20 @@ class _SymbolsHandler(BaseRequestHandler):
         for asset_symbol in asset_symbols_list:
             self._fetch_from_yahoo_finance(asset_symbol=asset_symbol)
 
+            with self._flask_app.app_context():
+                try:
+                    # Retrieve the asset id from the database.
+                    asset_id = self._db_session.query(AssetsDbTable.id).filter_by(symbol=asset_symbol).first().id
+                    train_lstm_model(asset_id, self._db_session)
+
+                    # Update asset entry.
+                    ref_asset_entry = self._db_session.query(AssetsDbTable).get(asset_id)
+                    ref_asset_entry.processing_status = "active"
+
+                except Exception as e:
+                    print(f"Failed analysis with message: {e}")
+                    return
+
     def _fetch_from_yahoo_finance(self, asset_symbol:str) -> None:
         """Fetch data from yahoo finance and store in the database.
 
@@ -188,7 +203,6 @@ class _SymbolsHandler(BaseRequestHandler):
                 description = metadata.get("longName", "Description not available")
 
                 # Update asset entry.
-                ref_asset_entry.processing_status = "active"
                 ref_asset_entry.description = description
 
                 self._db_session.commit()
