@@ -46,10 +46,11 @@ def setup_app():
         Flask: The instance to the flask application.
     """
 
+    setup_database()
+
     # Regularly update the data and model.
     DataAndModelUpdater(db_session=database.session, flask_app=flask_app)
 
-    setup_database()
     return flask_app
 
 # Run only if this script is executed directly. You'd only do that when debugging.
