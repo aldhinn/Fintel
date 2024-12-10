@@ -137,8 +137,11 @@ class _SymbolsHandler(BaseRequestHandler):
                     ref_asset_entry = self._db_session.query(AssetsDbTable).get(asset_id)
                     ref_asset_entry.processing_status = "active"
 
+                    self._db_session.commit()
+
                 except Exception as e:
                     print(f"Failed analysis with message: {e}")
+                    self._db_session.rollback()
                     return
 
     def _fetch_from_yahoo_finance(self, asset_symbol:str) -> None:
