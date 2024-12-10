@@ -1,6 +1,6 @@
 from utils.config import flask_app
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ENUM, BYTEA
+from sqlalchemy.dialects.postgresql import ENUM
 
 database = SQLAlchemy(flask_app)
 
@@ -99,7 +99,7 @@ class AIModelsDbTable(database.Model):
     asset_id = database.Column(database.Integer, database.ForeignKey("assets.id", ondelete="CASCADE"), nullable=False)  # Linked asset ID
     model_type = database.Column(database.String(100), nullable=False)  # Type of the model
     created_at = database.Column(database.DateTime, server_default=database.func.current_timestamp())  # Creation timestamp
-    model_data = database.Column(BYTEA, nullable=False)  # Serialized model data
+    model_data = database.Column(database.LargeBinary, nullable=False)  # Serialized model data
     last_trained = database.Column(database.DateTime)  # Timestamp of the last training
 
 class PredictionsDbTable(database.Model):
