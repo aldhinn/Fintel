@@ -125,7 +125,7 @@ def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
         # Delete the temporary file
         os.remove(temp_file_path)
 
-def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> Model|None:
+def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> tuple[int,Model]|None:
     """
     Loads a trained LSTM model from the database and returns it as a Keras model.
 
@@ -134,7 +134,7 @@ def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> Model|N
         db_session (Session | Any): The object that manages the database session.
 
     Returns:
-        Model | None: The loaded Keras model.
+        tuple[int, Model] | None: The tuple of model id and loaded Keras model.
     """
 
     # Fetch the model binary data from the database
@@ -142,7 +142,7 @@ def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> Model|N
 
     if model_entry and model_entry.model_data:
         # Create a temporary file to write the binary model data
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".h5") as tmp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".keras") as tmp_file:
             tmp_file.write(model_entry.model_data)
             temp_file_path = tmp_file.name
 
@@ -153,6 +153,6 @@ def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> Model|N
             # Clean up: Delete the temporary file
             os.remove(temp_file_path)
 
-        return model
+        return model_entry.id, model
     else:
         return None
