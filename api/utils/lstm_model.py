@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 from numpy import ndarray
 from pandas import DataFrame, Timestamp
@@ -10,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import Any
 from utils.db_models import PricePointsDbTable, PredictionsDbTable, AIModelsDbTable
 
-def _prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarray, ndarray]:
+def _prepare_training_data(price_points:list, predictions:dict) -> tuple[ndarray, ndarray]:
     """
     Prepares the training data for LSTM using price points and prediction errors.
 
@@ -21,6 +19,13 @@ def _prepare_training_data(price_points:list, predictions: dict) -> tuple[ndarra
     Returns:
         tuple[ndarray, ndarray]: Feature matrix (X) and target vector (y).
     """
+    # Convert decimal.Decimal to float in price points and predictions
+    for point in price_points:
+        for key in ["open_price", "high_price", "low_price", "close_price", "adjusted_close", "volume"]:
+            point[key] = float(point[key])
+
+    predictions = {date: float(error) for date, error in predictions.items()}
+
     data = DataFrame(price_points)
     data["error"] = data["date"].map(predictions).fillna(0.0)
 
