@@ -84,11 +84,10 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
     final endDate = DateTime.now();
     final startDate = DateTime.now().subtract(Duration(days: 30 * _monthsBack));
 
-    final response = await http.get(
-      Uri.parse("http://${widget.hostname}:${widget.port}/data?symbol=${widget.assetSymbol}"
-      "&start_date=${startDate.toIso8601String().substring(0, 10)}"
-      "&end_date=${endDate.toIso8601String().substring(0, 10)}")
-    );
+    final response = await http.get(Uri.parse(
+        "http://${widget.hostname}:${widget.port}/data?symbol=${widget.assetSymbol}"
+        "&start_date=${startDate.toIso8601String().substring(0, 10)}"
+        "&end_date=${endDate.toIso8601String().substring(0, 10)}"));
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
