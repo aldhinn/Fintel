@@ -6,10 +6,10 @@ from typing import Any, Literal
 from flask import Flask
 import yfinance as yf
 from yfinance import Ticker
-from pandas import DataFrame
+from pandas import DataFrame, Timedelta
 from sqlalchemy.orm import Session
 from utils.constants import API_ENDPOINT_DATA, API_ENDPOINT_SYMBOLS
-from utils.db_models import AssetsDbTable, PricePointsDbTable
+from utils.db_models import AssetsDbTable, PredictionsDbTable, PricePointsDbTable
 from utils.lstm_model import train_lstm_model
 
 class BaseRequestHandler(ABC):
@@ -230,9 +230,9 @@ class _DataHandler(BaseRequestHandler):
                     "error": "Request should be an object."
                 }, 400
 
-            symbol = request.get('symbol')
-            start_date = request.get('start_date')
-            end_date = request.get('end_date')
+            symbol = request.get("symbol")
+            start_date = request.get("start_date")
+            end_date = request.get("end_date")
 
             # Validate the required fields
             if symbol is None or start_date is None or end_date is None:
@@ -265,15 +265,23 @@ class _DataHandler(BaseRequestHandler):
                     } for record in joint_entries
                 ]
 
+                # Check if a prediction already exists for the specified date.
+                prediction_date = joint_entries[-1].date + Timedelta(days=1)
+                asset_id = joint_entries[-1].asset_id
+                next_adjusted_close = self._db_session.query(PredictionsDbTable).filter_by(asset_id=asset_id, date=prediction_date, prediction_type="adjusted_close").first()
+
                 return {
                     "description": joint_entries[0].description,
-                    "prices": price_data
+                    "prices": price_data,
+                    "predictions": {
+                        "close_price": next_adjusted_close.prediction if next_adjusted_close and next_adjusted_close.prediction else None
+                    }
                 }, 200
 
             except Exception as e:
                 self._db_session.rollback()
                 return {
-                    "error": f"Failed to retrieve price point entries with exception: {e}"
+                    "error": f"Failed to retrieve data with exception: {e}"
                 }, 500
         else:
             return {}, 204 # Returning an empty response.

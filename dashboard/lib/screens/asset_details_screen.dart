@@ -46,6 +46,12 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
   /// List of dates corresponding to each point in _priceData.
   List<DateTime> _dateData = [];
 
+  /// The value of the most recent adjusted close price.
+  double _recentAdjustedClosePrice = 0.0;
+
+  /// The value of the predicted next value of the adjusted close price.
+  double _nextAdjustedClosePrice = 0.0;
+
   /// Show the opening price graph.
   bool _showOpeningPriceGraph = false;
 
@@ -138,6 +144,10 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
 
         _dateData =
             pricePoints.map((entry) => DateTime.parse(entry['date'])).toList();
+
+        _recentAdjustedClosePrice = _adjustedClosePriceData.last.y;
+        _nextAdjustedClosePrice =
+            double.parse(jsonData["predictions"]["close_price"]);
       });
     } else {
       // TODO: Implement.
@@ -157,6 +167,28 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen> {
               ),
               TextSpan(
                 text: ' - $_assetDescription',
+                style: const TextStyle(fontWeight: FontWeight.normal),
+              ),
+              WidgetSpan(
+                child: SizedBox(width: 50),
+              ),
+              TextSpan(
+                text: "Recent Adjusted Close:",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                text: " ${_recentAdjustedClosePrice.toStringAsFixed(2)}",
+                style: const TextStyle(fontWeight: FontWeight.normal),
+              ),
+              WidgetSpan(
+                child: SizedBox(width: 50),
+              ),
+              TextSpan(
+                text: "Next Adjusted Close:",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                text: " ${_nextAdjustedClosePrice.toStringAsFixed(2)}",
                 style: const TextStyle(fontWeight: FontWeight.normal),
               ),
             ],
