@@ -2,8 +2,8 @@ import os
 import tempfile
 import numpy as np
 from numpy import ndarray
-from pandas import DataFrame, Timestamp
-from tensorflow.keras.models import Sequential, load_model, Model
+from pandas import DataFrame, Timestamp, Timedelta
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.optimizers import Adam
 from sqlalchemy.orm import Session
@@ -47,7 +47,7 @@ def _prepare_training_data(price_points:list, predictions:dict) -> tuple[ndarray
 
 def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
     """
-    Trains an LSTM model for each asset using price point data.
+    Trains or retrains an LSTM model for a given asset using its price point data.
 
     Args:
         asset_id (int): The identifier of the asset in the database.
@@ -70,9 +70,13 @@ def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
 
     # Retrieve predictions and calculate errors
     predictions = db_session.query(PredictionsDbTable).filter_by(asset_id=asset_id).all()
-    prediction_errors = {
-        pred.date: abs(pred.prediction - pred.close_price) for pred in predictions
-    } if predictions else {}
+    prediction_errors = {}
+
+    if predictions:
+        for pred in predictions:
+            corresponding_price_point = next((p for p in price_points if p["date"] == pred.date), None)
+            if corresponding_price_point:
+                prediction_errors[pred.date] = abs(pred.prediction - corresponding_price_point["adjusted_close"])
 
     # Prepare training data
     X, y = _prepare_training_data(price_points, prediction_errors)
@@ -81,21 +85,35 @@ def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
         print(f"Skipping asset {asset_id} due to insufficient data.")
         return
 
-    # Build the LSTM model
-    model = Sequential([
-        LSTM(50, return_sequences=True, input_shape=(X.shape[1], X.shape[2])),
-        LSTM(50),
-        Dense(1)
-    ])
+    # Check if the model already exists
+    existing_model = db_session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
 
-    model.compile(optimizer=Adam(learning_rate=0.001), loss="mean_squared_error")
+    if existing_model:
+        # Load the existing model
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".keras") as tmp_file:
+            temp_file_path = tmp_file.name
+            tmp_file.write(existing_model.model_data)
 
-    # Train the model
+        model = load_model(temp_file_path)
+
+        os.remove(temp_file_path)
+
+    else:
+        # Build a new LSTM model
+        model = Sequential([
+            LSTM(50, return_sequences=True, input_shape=(X.shape[1], X.shape[2])),
+            LSTM(50),
+            Dense(1)
+        ])
+
+        model.compile(optimizer=Adam(learning_rate=0.001), loss="mean_squared_error")
+
+    # Train or retrain the model
     model.fit(X, y, epochs=20, batch_size=32, verbose=2)
     # Retrieve timestamp as soon as it was trained.
     last_trained = Timestamp.now()
 
-    # Save the model to a temporary file in .keras format
+    # Save the updated model to a temporary file in .keras format
     with tempfile.NamedTemporaryFile(delete=False, suffix=".keras") as tmp_file:
         temp_file_path = tmp_file.name
         model.save(temp_file_path)
@@ -105,13 +123,12 @@ def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
         with open(temp_file_path, "rb") as f:
             model_data = f.read()
 
-        # Check if the model already exists
-        existing_model = db_session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
-
         if existing_model:
+            # Update the existing model
             existing_model.model_data = model_data
             existing_model.last_trained = last_trained
         else:
+            # Save the new model
             new_model = AIModelsDbTable(
                 asset_id=asset_id,
                 model_type="LSTM",
@@ -119,40 +136,38 @@ def train_lstm_model(asset_id: int, db_session:Session|Any) -> None:
                 last_trained=last_trained
             )
             db_session.add(new_model)
-            db_session.commit()
+
+        db_session.commit()
+
+        # Retrieve entry after commit.
+        existing_model = db_session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
+
+        # Make a prediction for the next day
+        last_sequence = X[-1].reshape(1, X.shape[1], X.shape[2])  # Use the last sequence in the training set.
+        # Check if a prediction for the next day already exists
+        next_day_date = price_points[-1]["date"] + Timedelta(days=1)
+        # Calculate the next day prediction.
+        next_day_prediction = float(model.predict(last_sequence)[0][0])
+
+        # Attempt to read for an existing prediction entry.
+        existing_prediction = db_session.query(PredictionsDbTable).filter_by(asset_id=asset_id, model_id=existing_model.id, date=next_day_date).first()
+
+        if existing_prediction:
+            # Update the existing prediction
+            existing_prediction.prediction = next_day_prediction
+        else:
+            # Save the prediction to the database
+            new_prediction = PredictionsDbTable(
+                asset_id=asset_id,
+                model_id=existing_model.id,
+                date=next_day_date,
+                prediction=next_day_prediction,
+                prediction_type="adjusted_close"
+            )
+            db_session.add(new_prediction)
+
+        db_session.commit()
 
     finally:
         # Delete the temporary file
         os.remove(temp_file_path)
-
-def load_lstm_model_to_variable(asset_id:int, db_session:Session|Any) -> tuple[int,Model]|None:
-    """
-    Loads a trained LSTM model from the database and returns it as a Keras model.
-
-    Args:
-        asset_id (int): The asset ID for which to load the model.
-        db_session (Session | Any): The object that manages the database session.
-
-    Returns:
-        tuple[int, Model] | None: The tuple of model id and loaded Keras model.
-    """
-
-    # Fetch the model binary data from the database
-    model_entry = db_session.query(AIModelsDbTable).filter_by(asset_id=asset_id).first()
-
-    if model_entry and model_entry.model_data:
-        # Create a temporary file to write the binary model data
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".keras") as tmp_file:
-            tmp_file.write(model_entry.model_data)
-            temp_file_path = tmp_file.name
-
-        try:
-            # Load the model from the temporary file
-            model = load_model(temp_file_path)
-        finally:
-            # Clean up: Delete the temporary file
-            os.remove(temp_file_path)
-
-        return model_entry.id, model
-    else:
-        return None
