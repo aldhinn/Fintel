@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
         context: context,
         builder: (BuildContext context) => Dialog(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).splashColor,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
