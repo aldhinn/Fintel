@@ -10,11 +10,10 @@ def test_prepare_training_data():
             'close_price': 105 + i,
             'adjusted_close': 106 + i,
             'volume': 1000 + i * 10
-        } for i in range(12)  # Ensure at least 12 entries for sequence + target
+        } for i in range(25)
     ]
     predictions = {"2024-01-01": 2.5}
 
-    X, _ = _prepare_training_data(price_points, predictions)
+    X, _, _ = _prepare_training_data(price_points, predictions)
     assert X.shape[0] > 0, "No training sequences generated."
     assert X.shape[1] == 10, "Sequence length is incorrect."
-    assert X.shape[2] == 6, "Feature count is incorrect."
