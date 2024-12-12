@@ -299,15 +299,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Theme.of(context)
                       .primaryColor, // Inherit primary color from theme
                 ),
-                child: Text(
-                  "Menu",
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary, // Inherit text color based on theme
-                    fontSize: 24,
-                  ),
-                ),
+                child: Text("Menu",
+                    style: Theme.of(context).textTheme.headlineSmall),
               ),
               ListTile(
                 leading: Icon(Icons.switch_left,
